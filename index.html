@@ -112,47 +112,6 @@
             margin-bottom: 3px;
         }
 
-        .rank-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-        .rank-table th { background: #2c3e50; color: #3498db; padding: 10px; position: sticky; top: 0; }
-        .rank-table td { border-bottom: 1px solid #555; padding: 8px; text-align: center; }
-        .rank-table tr:nth-child(1) td { color: #f1c40f; font-weight: bold; font-size: 1.1rem; }
-        .rank-table tr:nth-child(2) td { color: #bdc3c7; font-weight: bold; }
-        .rank-table tr:nth-child(3) td { color: #e67e22; font-weight: bold; }
-
-        .loading-text { color: #bdc3c7; margin: 20px; font-style: italic; }
-
-        .rank-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-            gap: 5px;
-        }
-        .rank-tab {
-            background: #34495e;
-            border: 1px solid #7f8c8d;
-            color: #bdc3c7;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border-radius: 5px;
-            flex: 1;
-        }
-        .rank-tab.active {
-            background: #3498db;
-            color: white;
-            border-color: #2980b9;
-            font-weight: bold;
-        }
-        .my-rank-row {
-            background-color: rgba(52, 152, 219, 0.2);
-            border: 2px solid #3498db !important;
-        }
-
         #start-screen {
             background: url('background (2).png') no-repeat center center;
             background-size: cover;
@@ -247,7 +206,7 @@
 
     <button id="bgm-btn" onclick="toggleSound()">🎵 소리: OFF</button>
 
-    <div class="version-text">라스트 노바: 인류의 마지막 빛 made by gamtudyssam 0.0015</div>
+    <div class="version-text">라스트 노바: 인류의 마지막 빛 made by gamtudyssam 0.0016</div>
 
     <canvas id="gameCanvas"></canvas>
 
@@ -287,10 +246,7 @@
 
                 <div>
                     <button onclick="startNewGame()">새 게임 시작</button>
-                    <button class="secondary" onclick="showRecords()"> 나의 기록 보기</button>
-                </div>
-                <div style="margin-top: 5px;">
-                    <button class="green" onclick="showGlobalRankings()">🌍 세계의 위대한 용사들 명단</button>
+                    <button class="secondary" onclick="showRecords()">나의 기록 보기</button>
                 </div>
             </div>
         </div>
@@ -306,34 +262,6 @@
                 </table>
             </div>
             <button class="secondary" onclick="hideRecords()">닫기</button>
-        </div>
-
-        <div id="ranking-screen" class="popup hidden">
-            <h2>🌍 세계의 위대한 용사들 명단</h2>
-
-            <div class="rank-tabs">
-                <button class="rank-tab active" id="tab-bestScore" onclick="loadRankings('bestScore')">점수</button>
-                <button class="rank-tab" id="tab-bestCombo" onclick="loadRankings('bestCombo')">콤보</button>
-                <button class="rank-tab" id="tab-lifetimeCorrect" onclick="loadRankings('lifetimeCorrect')">누적정답</button>
-                <button class="rank-tab" id="tab-accuracy" onclick="loadRankings('accuracy')">정답률</button>
-            </div>
-
-            <div id="rank-info" style="font-size: 0.8rem; color: #bdc3c7; margin: 5px 0;">
-                상위 100위까지 표시됩니다.
-            </div>
-
-            <div id="ranking-list" style="max-height: 250px; overflow-y: auto;">
-                <p class="loading-text">데이터를 불러오는 중...</p>
-            </div>
-
-            <div id="my-rank-section" style="border-top: 1px solid #555; padding-top: 10px; margin-top: 10px; display: none;">
-                <div style="color: #f1c40f; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px;">내 순위</div>
-                <table class="rank-table" style="margin-top: 0;">
-                    <tbody id="my-rank-body"></tbody>
-                </table>
-            </div>
-
-            <button class="secondary" onclick="hideGlobalRankings()">닫기</button>
         </div>
 
         <div id="game-over-screen" class="popup hidden">
@@ -377,23 +305,113 @@ const bgImg = new Image();
 bgImg.src = '미래 도시 풍경의 반전.png';
 
 /*
-  ===== 중요 =====
-  아래 QUESTIONS 배열은
-  네가 기존에 쓰던 긴 문제 데이터 배열을 그대로 붙여 넣으면 돼.
+  여기에 QUESTIONS 배열을 넣어 주세요.
+  예시:
+  const QUESTIONS = [
+    {"q":"2 + 3 = ?", "a":"5", "w":["4","6"]},
+    ...
+  ];
 */
 const QUESTIONS = [
-  {"q":"관용 표현 '간 떨어지다'의 뜻은?","a":"매우 놀라다.","w":["남에게 착한 마음을 베풀다.","다른 사람의 일을 방해하다. (=찬물을 끼얹다.)"]},
-  {"q":"관용 표현 '눈에 띄다'의 뜻은?","a":"두드러지게 드러나다.","w":["아무 말도 하지 못하고 가만히 있다.","서로 뜻이 맞아 잘 어울리다."]},
-  {"q":"관용 표현 '간이 배 밖으로 나오다'의 뜻은?","a":"무서워하지 않고 대들다.","w":["다른 사람에게 알리지 않다.","사람이) 죽어서 땅에 묻히다."]},
-  {"q":"관용 표현 '눈에 불을 켜다'의 뜻은?","a":"몹시 욕심을 내거나 관심을 기울이다.","w":["힘을 다하고 정성을 다하여 한 일은 그 결과가 헛되지 않는다.","조금도 남기지 않고 모조리 먹다."]},
-  {"q":"관용 표현 '간이 부었다'의 뜻은?","a":"지나치게 대담하다.","w":["남에게 착한 마음을 베풀다.","앞뒤 사정을 고려하지 않다."]},
-  {"q":"관용 표현 '눈에 차지 않다'의 뜻은?","a":"마음에 들지 않다.","w":["숨기거나 감추지 않다.","마음에 내키지 않아 하기 싫어하다."]},
-  {"q":"관용 표현 '간이 서늘하다'의 뜻은?","a":"위험하고 두려워 매우 놀라다.","w":["어떤 일을 하거나 생각한 것에 뒤늦게 후회하다.","부끄러워 얼굴이 붉어지다."]},
-  {"q":"관용 표현 '눈에 흙이 들어가다'의 뜻은?","a":"(사람이) 죽어서 땅에 묻히다.","w":["몹시 가슴이 아프다.","성질이 급하여 참지 못하다."]},
-  {"q":"관용 표현 '간이 콩알만 해지다'의 뜻은?","a":"몹시 두려워지거나 무서워지다.","w":["남에게 속임을 당하다.","슬프고 서러워 마음이 몹시 아프다."]},
-  {"q":"관용 표현 '눈을 돌리다'의 뜻은?","a":"관심을 돌리다.","w":["무슨 일이나 말이 어처구니없어 말문이 막히다.","우쭐하여 뽐내다."]}
-
-  // 기존 전체 QUESTIONS 배열을 여기에 그대로 붙여 넣어
+  {"q":"12 × 3 = ?","a":"36","w":["26","46"]},
+  {"q":"14 × 2 = ?","a":"28","w":["24","32"]},
+  {"q":"15 × 4 = ?","a":"60","w":["50","70"]},
+  {"q":"16 × 3 = ?","a":"48","w":["38","58"]},
+  {"q":"17 × 5 = ?","a":"85","w":["75","95"]},
+  {"q":"18 × 2 = ?","a":"36","w":["34","38"]},
+  {"q":"19 × 4 = ?","a":"76","w":["66","86"]},
+  {"q":"21 × 3 = ?","a":"63","w":["53","73"]},
+  {"q":"22 × 4 = ?","a":"88","w":["78","98"]},
+  {"q":"23 × 2 = ?","a":"46","w":["44","48"]},
+  {"q":"24 × 3 = ?","a":"72","w":["62","82"]},
+  {"q":"25 × 4 = ?","a":"100","w":["90","110"]},
+  {"q":"26 × 2 = ?","a":"52","w":["42","62"]},
+  {"q":"27 × 3 = ?","a":"81","w":["71","91"]},
+  {"q":"28 × 5 = ?","a":"140","w":["130","150"]},
+  {"q":"29 × 2 = ?","a":"58","w":["48","68"]},
+  {"q":"31 × 3 = ?","a":"93","w":["83","103"]},
+  {"q":"32 × 2 = ?","a":"64","w":["54","74"]},
+  {"q":"33 × 4 = ?","a":"132","w":["122","142"]},
+  {"q":"34 × 3 = ?","a":"102","w":["92","112"]},
+  {"q":"35 × 2 = ?","a":"70","w":["60","80"]},
+  {"q":"36 × 4 = ?","a":"144","w":["134","154"]},
+  {"q":"37 × 3 = ?","a":"111","w":["101","121"]},
+  {"q":"38 × 2 = ?","a":"76","w":["66","86"]},
+  {"q":"39 × 5 = ?","a":"195","w":["185","205"]},
+  {"q":"41 × 2 = ?","a":"82","w":["72","92"]},
+  {"q":"42 × 3 = ?","a":"126","w":["116","136"]},
+  {"q":"43 × 4 = ?","a":"172","w":["162","182"]},
+  {"q":"44 × 2 = ?","a":"88","w":["78","98"]},
+  {"q":"45 × 3 = ?","a":"135","w":["125","145"]},
+  {"q":"46 × 2 = ?","a":"92","w":["82","102"]},
+  {"q":"47 × 4 = ?","a":"188","w":["178","198"]},
+  {"q":"48 × 3 = ?","a":"144","w":["134","154"]},
+  {"q":"49 × 2 = ?","a":"98","w":["88","108"]},
+  {"q":"51 × 3 = ?","a":"153","w":["143","163"]},
+  {"q":"52 × 4 = ?","a":"208","w":["198","218"]},
+  {"q":"53 × 2 = ?","a":"106","w":["96","116"]},
+  {"q":"54 × 3 = ?","a":"162","w":["152","172"]},
+  {"q":"55 × 2 = ?","a":"110","w":["100","120"]},
+  {"q":"56 × 4 = ?","a":"224","w":["214","234"]},
+  {"q":"57 × 3 = ?","a":"171","w":["161","181"]},
+  {"q":"58 × 2 = ?","a":"116","w":["106","126"]},
+  {"q":"59 × 5 = ?","a":"295","w":["285","305"]},
+  {"q":"61 × 2 = ?","a":"122","w":["112","132"]},
+  {"q":"62 × 3 = ?","a":"186","w":["176","196"]},
+  {"q":"63 × 4 = ?","a":"252","w":["242","262"]},
+  {"q":"64 × 2 = ?","a":"128","w":["118","138"]},
+  {"q":"65 × 3 = ?","a":"195","w":["185","205"]},
+  {"q":"66 × 2 = ?","a":"132","w":["122","142"]},
+  {"q":"67 × 4 = ?","a":"268","w":["258","278"]},
+  {"q":"68 × 3 = ?","a":"204","w":["194","214"]},
+  {"q":"69 × 2 = ?","a":"138","w":["128","148"]},
+  {"q":"71 × 3 = ?","a":"213","w":["203","223"]},
+  {"q":"72 × 4 = ?","a":"288","w":["278","298"]},
+  {"q":"73 × 2 = ?","a":"146","w":["136","156"]},
+  {"q":"74 × 3 = ?","a":"222","w":["212","232"]},
+  {"q":"75 × 2 = ?","a":"150","w":["140","160"]},
+  {"q":"76 × 4 = ?","a":"304","w":["294","314"]},
+  {"q":"77 × 3 = ?","a":"231","w":["221","241"]},
+  {"q":"78 × 2 = ?","a":"156","w":["146","166"]},
+  {"q":"79 × 5 = ?","a":"395","w":["385","405"]},
+  {"q":"81 × 2 = ?","a":"162","w":["152","172"]},
+  {"q":"82 × 3 = ?","a":"246","w":["236","256"]},
+  {"q":"83 × 4 = ?","a":"332","w":["322","342"]},
+  {"q":"84 × 2 = ?","a":"168","w":["158","178"]},
+  {"q":"85 × 3 = ?","a":"255","w":["245","265"]},
+  {"q":"86 × 2 = ?","a":"172","w":["162","182"]},
+  {"q":"87 × 4 = ?","a":"348","w":["338","358"]},
+  {"q":"88 × 3 = ?","a":"264","w":["254","274"]},
+  {"q":"89 × 2 = ?","a":"178","w":["168","188"]},
+  {"q":"91 × 3 = ?","a":"273","w":["263","283"]},
+  {"q":"92 × 4 = ?","a":"368","w":["358","378"]},
+  {"q":"93 × 2 = ?","a":"186","w":["176","196"]},
+  {"q":"94 × 3 = ?","a":"282","w":["272","292"]},
+  {"q":"95 × 2 = ?","a":"190","w":["180","200"]},
+  {"q":"96 × 4 = ?","a":"384","w":["374","394"]},
+  {"q":"97 × 3 = ?","a":"291","w":["281","301"]},
+  {"q":"98 × 2 = ?","a":"196","w":["186","206"]},
+  {"q":"99 × 5 = ?","a":"495","w":["485","505"]},
+  {"q":"13 × 6 = ?","a":"78","w":["68","88"]},
+  {"q":"22 × 5 = ?","a":"110","w":["100","120"]},
+  {"q":"34 × 5 = ?","a":"170","w":["160","180"]},
+  {"q":"46 × 5 = ?","a":"230","w":["220","240"]},
+  {"q":"58 × 4 = ?","a":"232","w":["222","242"]},
+  {"q":"67 × 5 = ?","a":"335","w":["325","345"]},
+  {"q":"74 × 4 = ?","a":"296","w":["286","306"]},
+  {"q":"83 × 5 = ?","a":"415","w":["405","425"]},
+  {"q":"92 × 5 = ?","a":"460","w":["450","470"]},
+  {"q":"27 × 6 = ?","a":"162","w":["152","172"]},
+  {"q":"35 × 6 = ?","a":"210","w":["200","220"]},
+  {"q":"48 × 6 = ?","a":"288","w":["278","298"]},
+  {"q":"56 × 5 = ?","a":"280","w":["270","290"]},
+  {"q":"63 × 6 = ?","a":"378","w":["368","388"]},
+  {"q":"72 × 5 = ?","a":"360","w":["350","370"]},
+  {"q":"84 × 6 = ?","a":"504","w":["494","514"]},
+  {"q":"18 × 7 = ?","a":"126","w":["116","136"]},
+  {"q":"26 × 7 = ?","a":"182","w":["172","192"]},
+  {"q":"41 × 6 = ?","a":"246","w":["236","256"]},
+  {"q":"53 × 7 = ?","a":"371","w":["361","381"]}
 ];
 
 /**
@@ -439,12 +457,15 @@ let nextGateFrame = 0;
 let player;
 let targetX;
 
-const GATE_READ_DELAY = 90;
+const GATE_READ_DELAY = 180;
+let questionPauseTimer = 0;
 
 let storedBomb = 0;
 let storedFever = 0;
 const MAX_STORED_BOMB = 3;
 const MAX_STORED_FEVER = 3;
+
+let bossCollisionCooldown = 0;
 
 /**
  * 유틸리티
@@ -457,13 +478,12 @@ function shuffle(array) {
     return array;
 }
 
-const SAVE_KEY = 'weatherRun_save_v2';
-const RECORD_KEY = 'weatherRun_records_v2';
-const STATS_KEY = 'weatherRun_stats_v1';
+const SAVE_KEY = 'weatherRun_save_local_v2';
+const RECORD_KEY = 'weatherRun_records_local_v2';
+const STATS_KEY = 'weatherRun_stats_local_v1';
 const CURRENT_NICKNAME_KEY = 'weatherRun_current_nickname';
-const SECRET_SALT = "science_run_secret_salt_2025";
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxops2fGy-Gwo5YAqhmc4B3h09tHNl42cf1fzyMLTMc6DYUKyaKt22kbegmp_HzfuIx/exec";
+const SECRET_SALT = "science_run_secret_salt_2025";
 
 function generateHash(data) {
     const str = JSON.stringify(data) + SECRET_SALT;
@@ -543,6 +563,8 @@ function saveGame() {
         nextGateFrame,
         storedBomb,
         storedFever,
+        bossSpawnScore,
+        gameSpeed,
         player: player ? { x: player.x, y: player.y, soldiers: player.soldiers } : null,
         enemies: enemies
             .filter(e => e instanceof Enemy)
@@ -563,7 +585,8 @@ function saveGame() {
             passed: g.passed,
             readDelay: g.readDelay || 0
         })),
-        currentQuestionObj
+        currentQuestionObj,
+        questionPauseTimer
     };
 
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
@@ -803,7 +826,6 @@ class Enemy {
             this.speed = gameSpeed + 0.8 + Math.random() * 1.2;
         }
 
-        const normalBonusHp = score >= 5000 ? Math.max(1, Math.floor((score - 5000) / 2000) + 1) : 0;
         const baseHp = 3;
 
         if (hp !== null && hp !== undefined) {
@@ -811,8 +833,8 @@ class Enemy {
         } else {
             this.hp = baseHp * this.packSize * hpMultiplier;
 
-            if (this.type === 'normal' && score >= 5000) {
-                this.hp += normalBonusHp;
+            if (this.type === 'normal') {
+                this.hp = Math.max(3, Math.floor(score * 0.01));
             }
 
             if (this.type === 'armor') {
@@ -976,7 +998,7 @@ class Enemy {
                 ctx.fillRect(this.x, this.y, this.width, this.height);
             }
 
-            if (this.type === 'normal' && score >= 5000) {
+            if (this.type === 'normal') {
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = 'white';
                 ctx.font = 'bold 12px Arial';
@@ -1052,9 +1074,9 @@ class Item {
         this.markedForDeletion = false;
 
         const rand = Math.random();
-        if (rand < 0.45) this.type = 'shield';
-        else if (rand < 0.60) this.type = 'plus';
-        else if (rand < 0.72) this.type = 'fever';
+        if (rand < 0.55) this.type = 'shield';
+        else if (rand < 0.85) this.type = 'plus';
+        else if (rand < 0.93) this.type = 'fever';
         else this.type = 'bomb';
     }
 
@@ -1127,7 +1149,7 @@ class Item {
 }
 
 function spawnItem() {
-    if (Math.random() < 0.0007) {
+    if (Math.random() < 0.0005) {
         items.push(new Item());
     }
 }
@@ -1246,17 +1268,11 @@ class Boss {
         this.hp = 100 + (this.level * 50);
         this.maxHp = this.hp;
         this.markedForDeletion = false;
-        this.angle = 0;
         this.attackTimer = 0;
         this.isDashing = false;
-        this.dashTargetY = 0;
 
         const rand = Math.floor(Math.random() * 5);
-        if (rand < 4) {
-            this.image = bossImgs[rand];
-        } else {
-            this.image = enemyImg;
-        }
+        this.image = rand < 4 ? bossImgs[rand] : enemyImg;
     }
 
     update() {
@@ -1290,7 +1306,6 @@ class Boss {
     attack() {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height;
-
         const dx = (player.x + player.width / 2) - centerX;
         const dy = (player.y + player.height / 2) - centerY;
         const targetAngle = Math.atan2(dy, dx);
@@ -1414,9 +1429,12 @@ function createFloatingText(text, x, y, color) {
  * 게임 로직
  */
 function spawnGateRow() {
+    if (QUESTIONS.length === 0) return;
+
     const qIndex = Math.floor(Math.random() * QUESTIONS.length);
     const qData = QUESTIONS[qIndex];
     currentQuestionObj = qData;
+    questionPauseTimer = GATE_READ_DELAY;
 
     const gateWidth = GAME_WIDTH / 3;
 
@@ -1715,7 +1733,7 @@ function drawRoad() {
         ctx.lineWidth = 4;
         ctx.setLineDash([20, 20]);
 
-        if (!isBossBattleMode) {
+        if (!isBossBattleMode && questionPauseTimer <= 0) {
             scrollOffset += gameSpeed;
         }
         const lineOffset = scrollOffset % 40;
@@ -1734,7 +1752,7 @@ function drawRoad() {
         return;
     }
 
-    if (!isBossBattleMode) {
+    if (!isBossBattleMode && questionPauseTimer <= 0) {
         scrollOffset += gameSpeed;
     }
 
@@ -1761,11 +1779,11 @@ function drawUI() {
         ctx.fillStyle = '#f39c12';
         wrapText(ctx, "Q. " + currentQuestionObj.q, GAME_WIDTH / 2, 30, GAME_WIDTH - 40, 24);
 
-        const maxDelay = gates.length > 0 ? Math.max(...gates.map(g => g.readDelay || 0)) : 0;
-        if (maxDelay > 0) {
+        if (questionPauseTimer > 0) {
+            const remain = Math.ceil(questionPauseTimer / 60);
             ctx.font = 'bold 14px Malgun Gothic';
             ctx.fillStyle = '#f1c40f';
-            ctx.fillText(`읽는 시간... ${Math.ceil(maxDelay / 60)}초`, GAME_WIDTH / 2, 70);
+            ctx.fillText(`읽는 시간... ${remain}초`, GAME_WIDTH / 2, 70);
         }
     } else {
         ctx.font = 'bold 20px Malgun Gothic';
@@ -1782,6 +1800,34 @@ function animate() {
     player.x += (targetX - player.x) * 0.1;
     if (player.x < 0) player.x = 0;
     if (player.x > GAME_WIDTH - player.width) player.x = GAME_WIDTH - player.width;
+
+    if (questionPauseTimer > 0) {
+        questionPauseTimer--;
+
+        gates.forEach(g => g.draw());
+        enemies.forEach(e => e.draw());
+        items.forEach(item => item.draw());
+        if (boss) boss.draw();
+        player.draw();
+        bullets.forEach(b => b.draw());
+        particles.forEach(p => p.draw());
+
+        floatingTexts.forEach((ft, idx) => {
+            ft.y -= 1;
+            ft.life--;
+            ctx.globalAlpha = ft.life / 60;
+            ctx.fillStyle = ft.color;
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.globalAlpha = 1.0;
+            if (ft.life <= 0) floatingTexts.splice(idx, 1);
+        });
+
+        drawUI();
+        requestAnimationFrame(animate);
+        return;
+    }
 
     if (frameCount > nextGateFrame && !gates.some(g => g.y < GAME_HEIGHT && g.y > 0)) {
         if (!isBossBattleMode) {
@@ -1818,6 +1864,8 @@ function animate() {
 
     player.update();
     player.draw();
+
+    if (bossCollisionCooldown > 0) bossCollisionCooldown--;
 
     bullets.forEach(b => { b.update(); b.draw(); });
     bullets = bullets.filter(b => !b.markedForDeletion);
@@ -1888,7 +1936,7 @@ function animate() {
             player.y < boss.y + boss.height &&
             player.y + player.height > boss.y
         ) {
-            if (!shieldActive) {
+            if (!shieldActive && bossCollisionCooldown <= 0) {
                 let damage = 0;
                 const currentLevel = Math.floor(score / 2000) + 1;
 
@@ -1899,9 +1947,11 @@ function animate() {
                         damage = 300;
                     }
 
+                    bossCollisionCooldown = 45;
                     createFloatingText("CRITICAL!", player.x, player.y, "red");
                     player.soldiers -= damage;
                     createFloatingText(`-${damage}`, player.x, player.y, "red");
+                    updateHUD();
                 }
             }
         }
@@ -1954,7 +2004,7 @@ function startNewGame() {
 
     const storedNick = localStorage.getItem(CURRENT_NICKNAME_KEY);
     if (storedNick && storedNick !== nick) {
-        const confirmChange = confirm(`닉네임을 '${storedNick}'에서 '${nick}'(으)로 변경하시겠습니까?\n\n⚠️ 주의: 닉네임 변경 시 최고 기록, 누적 통계 등 모든 데이터가 초기화됩니다.`);
+        const confirmChange = confirm(`닉네임이 변경되었습니다.\n\n⚠️ 주의: 변경 시 최고 기록, 누적 통계 등 모든 데이터가 초기화됩니다.`);
         if (!confirmChange) return;
 
         localStorage.removeItem(SAVE_KEY);
@@ -1997,6 +2047,9 @@ function loadGameAndStart() {
     currentQuestionObj = data.currentQuestionObj;
     storedBomb = data.storedBomb || 0;
     storedFever = data.storedFever || 0;
+    bossSpawnScore = data.bossSpawnScore || 1000;
+    gameSpeed = data.gameSpeed || 1.2;
+    questionPauseTimer = data.questionPauseTimer || 0;
 
     player = new Player(data.player?.x, data.player?.y, data.player?.soldiers);
 
@@ -2044,6 +2097,7 @@ function resetGameData() {
     maxCombo = 0;
     currentQuestionObj = null;
     bossSpawnScore = 1000;
+    questionPauseTimer = 0;
 
     shieldActive = false;
     shieldTimer = 0;
@@ -2053,6 +2107,7 @@ function resetGameData() {
     storedBomb = 0;
     storedFever = 0;
 
+    bossCollisionCooldown = 0;
     gameSpeed = 1.2;
     updateHUD();
 }
@@ -2078,7 +2133,6 @@ function endGame() {
 
     saveGlobalStats();
     updateHUDStats();
-    sendToGlobalRanking();
 
     saveRecord();
     localStorage.removeItem(SAVE_KEY);
@@ -2120,6 +2174,7 @@ function hideRecords() {
 
 function initStartScreen() {
     const storedNick = localStorage.getItem(CURRENT_NICKNAME_KEY);
+
     if (storedNick) {
         document.getElementById('nickname-input').value = storedNick;
     }
@@ -2223,150 +2278,6 @@ function playSound(type) {
             audio.play().catch(e => console.log("효과음 재생 실패", e));
         }
     }
-}
-
-/**
- * 글로벌 랭킹
- */
-function sendToGlobalRanking() {
-    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) return;
-
-    const payload = {
-        action: "update",
-        nickname: nickname,
-        bestScore: globalStats.bestScore,
-        bestCombo: globalStats.bestMaxCombo,
-        bestCorrect: globalStats.bestCorrect,
-        lifetimeCorrect: globalStats.lifetimeCorrect,
-        lifetimeAttempts: globalStats.lifetimeAttempts
-    };
-
-    const queryString = new URLSearchParams(payload).toString();
-
-    fetch(GOOGLE_SCRIPT_URL + "?" + queryString)
-        .then(res => res.json())
-        .then(data => {
-            console.log("랭킹 전송 성공:", data);
-        })
-        .catch(err => {
-            console.warn("랭킹 전송 실패:", err);
-        });
-}
-
-function showGlobalRankings() {
-    document.getElementById('ranking-screen').classList.remove('hidden');
-    loadRankings('bestScore');
-}
-
-function loadRankings(sortBy) {
-    const listDiv = document.getElementById('ranking-list');
-    const myRankSection = document.getElementById('my-rank-section');
-    const rankInfo = document.getElementById('rank-info');
-
-    document.querySelectorAll('.rank-tab').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`tab-${sortBy}`).classList.add('active');
-
-    if (sortBy === 'accuracy') {
-        rankInfo.innerHTML = "⚠️ 정답률 랭킹은 30문제 이상 푼 사용자만 집계됩니다.<br>(상위 100위 표시)";
-        rankInfo.style.color = "#e74c3c";
-    } else {
-        rankInfo.innerHTML = "상위 100위까지 표시됩니다.";
-        rankInfo.style.color = "#bdc3c7";
-    }
-
-    listDiv.innerHTML = '<p class="loading-text">데이터를 불러오는 중...</p>';
-    myRankSection.style.display = 'none';
-
-    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) {
-        listDiv.innerHTML = '<p class="loading-text">랭킹 서버 URL이 설정되지 않았습니다.</p>';
-        return;
-    }
-
-    fetch(`${GOOGLE_SCRIPT_URL}?action=getRankings&sortBy=${sortBy}&myNickname=${encodeURIComponent(nickname)}`)
-        .then(res => res.json())
-        .then(response => {
-            const data = response.top100;
-            const myRankData = response.myRank;
-
-            if (!data || data.length === 0) {
-                listDiv.innerHTML = '<p class="loading-text">등록된 랭킹이 없습니다.</p>';
-                return;
-            }
-
-            let valueHeader = "점수";
-            if (sortBy === 'bestCombo') valueHeader = "콤보";
-            else if (sortBy === 'lifetimeCorrect') valueHeader = "누적 정답";
-            else if (sortBy === 'accuracy') valueHeader = "정답률";
-
-            let html = `
-                <table class="rank-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 15%">순위</th>
-                            <th style="width: 50%">이름</th>
-                            <th style="width: 35%">${valueHeader}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            let isMeInTop100 = false;
-
-            data.forEach((item, index) => {
-                let value = item.bestScore;
-                if (sortBy === 'bestCombo') value = item.bestCombo;
-                else if (sortBy === 'lifetimeCorrect') value = item.lifetimeCorrect;
-                else if (sortBy === 'accuracy') value = item.accuracy.toFixed(1) + '%';
-
-                const isMe = item.nickname === nickname;
-                if (isMe) isMeInTop100 = true;
-
-                html += `
-                    <tr class="${isMe ? 'my-rank-row' : ''}">
-                        <td>${index + 1}</td>
-                        <td>${item.nickname}</td>
-                        <td>${value}</td>
-                    </tr>
-                `;
-            });
-
-            html += '</tbody></table>';
-            listDiv.innerHTML = html;
-
-            if (!isMeInTop100 && myRankData) {
-                let myValue = myRankData.bestScore;
-                if (sortBy === 'bestCombo') myValue = myRankData.bestCombo;
-                else if (sortBy === 'lifetimeCorrect') myValue = myRankData.lifetimeCorrect;
-                else if (sortBy === 'accuracy') myValue = myRankData.accuracy.toFixed(1) + '%';
-
-                const myRankHtml = `
-                    <tr class="my-rank-row">
-                        <td style="width: 15%">${myRankData.rank}</td>
-                        <td style="width: 50%">${myRankData.nickname}</td>
-                        <td style="width: 35%">${myValue}</td>
-                    </tr>
-                `;
-                document.getElementById('my-rank-body').innerHTML = myRankHtml;
-                myRankSection.style.display = 'block';
-            } else if (!isMeInTop100 && sortBy === 'accuracy' && globalStats.lifetimeAttempts < 30) {
-                document.getElementById('my-rank-body').innerHTML = `
-                    <tr><td colspan="3" style="color: #e74c3c;">30문제 이상 풀어야 랭킹에 진입합니다. (현재: ${globalStats.lifetimeAttempts})</td></tr>
-                `;
-                myRankSection.style.display = 'block';
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            listDiv.innerHTML = `
-                <div style="padding: 20px; color: #e74c3c;">
-                    <p>랭킹을 불러오지 못했습니다.</p>
-                </div>
-            `;
-        });
-}
-
-function hideGlobalRankings() {
-    document.getElementById('ranking-screen').classList.add('hidden');
 }
 </script>
 </body>
