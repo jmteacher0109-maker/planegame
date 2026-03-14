@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>라스트 노바: 인류의 마지막 빛</title>
     <style>
         body {
@@ -21,10 +21,7 @@
         }
         #ui-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             pointer-events: none;
             display: flex;
             justify-content: center;
@@ -94,6 +91,7 @@
             text-shadow: 1px 1px 2px black;
             pointer-events: none;
             font-size: 1rem;
+            z-index: 15;
         }
         .stat-item { margin-bottom: 5px; }
         .combo-text { color: #f1c40f; font-size: 1.2rem; transition: transform 0.1s; }
@@ -191,22 +189,20 @@
     </style>
 </head>
 <body>
-
     <audio id="bgm-audio" loop>
-        <source src="cinematic-epic-music-459422.mp3" type="audio/mp3">
+        <source src="cinematic-epic-music-459422.mp3" type="audio/mp3" />
     </audio>
 
-    <audio id="sfx-correct"><source src="bonus-points-190035.mp3" type="audio/mp3"></audio>
-    <audio id="sfx-wrong"><source src="error-010-206498.mp3" type="audio/mp3"></audio>
-    <audio id="sfx-bomb"><source src="nuclear-explosion-386181.mp3" type="audio/mp3"></audio>
-    <audio id="sfx-shoot"><source src="22-caliber-with-ricochet-39679.mp3" type="audio/mp3"></audio>
-    <audio id="sfx-boss-explosion"><source src="explosion-fx-343683.mp3" type="audio/mp3"></audio>
-    <audio id="sfx-small-explosion"><source src="small-explosion-103931.mp3" type="audio/mp3"></audio>
-    <audio id="sfx-boss-dash"><source src="lazercannon-37980.mp3" type="audio/mp3"></audio>
+    <audio id="sfx-correct"><source src="bonus-points-190035.mp3" type="audio/mp3" /></audio>
+    <audio id="sfx-wrong"><source src="error-010-206498.mp3" type="audio/mp3" /></audio>
+    <audio id="sfx-bomb"><source src="nuclear-explosion-386181.mp3" type="audio/mp3" /></audio>
+    <audio id="sfx-shoot"><source src="22-caliber-with-ricochet-39679.mp3" type="audio/mp3" /></audio>
+    <audio id="sfx-boss-explosion"><source src="explosion-fx-343683.mp3" type="audio/mp3" /></audio>
+    <audio id="sfx-small-explosion"><source src="small-explosion-103931.mp3" type="audio/mp3" /></audio>
+    <audio id="sfx-boss-dash"><source src="lazercannon-37980.mp3" type="audio/mp3" /></audio>
 
     <button id="bgm-btn" onclick="toggleSound()">🎵 소리: OFF</button>
-
-    <div class="version-text">라스트 노바: 인류의 마지막 빛 made by gamtudyssam 0.0016</div>
+    <div class="version-text">라스트 노바: 인류의 마지막 빛 made by gamtudyssam 0.0017</div>
 
     <canvas id="gameCanvas"></canvas>
 
@@ -237,7 +233,7 @@
                 <h1>라스트 노바<br><span style="font-size: 0.7em;">: 인류의 마지막 빛</span></h1>
                 <p>미지의 외계인들이 지구를 삼키려 한다. 이제, 인류의 마지막 희망인 당신이 외계 본거지로 향한다. 모든 것을 걸고 싸워, 인류의 새벽을 다시 맞이하라!</p>
 
-                <input type="text" id="nickname-input" placeholder="닉네임을 입력하세요" maxlength="8">
+                <input type="text" id="nickname-input" placeholder="닉네임을 입력하세요" maxlength="8" />
 
                 <div id="resume-area" class="hidden">
                     <p style="color: #e67e22;">저장된 게임이 있습니다!</p>
@@ -284,6 +280,7 @@ canvas.height = GAME_HEIGHT;
 
 const playerImg = new Image();
 playerImg.src = 'spaceship.png';
+
 const enemyImg = new Image();
 enemyImg.src = 'alien.png';
 
@@ -304,14 +301,6 @@ itemImgs.fever.src = 'fever.png';
 const bgImg = new Image();
 bgImg.src = '미래 도시 풍경의 반전.png';
 
-/*
-  여기에 QUESTIONS 배열을 넣어 주세요.
-  예시:
-  const QUESTIONS = [
-    {"q":"2 + 3 = ?", "a":"5", "w":["4","6"]},
-    ...
-  ];
-*/
 const QUESTIONS = [
   {"q":"12 × 3 = ?","a":"36","w":["26","46"]},
   {"q":"14 × 2 = ?","a":"28","w":["24","32"]},
@@ -415,7 +404,7 @@ const QUESTIONS = [
 ];
 
 /**
- * 게임 상태 변수
+ * 게임 상태
  */
 let gameState = 'START';
 let frameCount = 0;
@@ -457,7 +446,7 @@ let nextGateFrame = 0;
 let player;
 let targetX;
 
-const GATE_READ_DELAY = 180;
+const GATE_READ_DELAY = 180; // 3초
 let questionPauseTimer = 0;
 
 let storedBomb = 0;
@@ -478,11 +467,10 @@ function shuffle(array) {
     return array;
 }
 
-const SAVE_KEY = 'weatherRun_save_local_v2';
-const RECORD_KEY = 'weatherRun_records_local_v2';
-const STATS_KEY = 'weatherRun_stats_local_v1';
-const CURRENT_NICKNAME_KEY = 'weatherRun_current_nickname';
-
+const SAVE_KEY = 'weatherRun_save_local_v3';
+const RECORD_KEY = 'weatherRun_records_local_v3';
+const STATS_KEY = 'weatherRun_stats_local_v2';
+const CURRENT_NICKNAME_KEY = 'weatherRun_current_nickname_v2';
 const SECRET_SALT = "science_run_secret_salt_2025";
 
 function generateHash(data) {
@@ -565,17 +553,27 @@ function saveGame() {
         storedFever,
         bossSpawnScore,
         gameSpeed,
+        questionPauseTimer,
+        currentQuestionObj,
+        shieldActive,
+        shieldTimer,
+        feverActive,
+        feverTimer,
+        bossCollisionCooldown,
         player: player ? { x: player.x, y: player.y, soldiers: player.soldiers } : null,
-        enemies: enemies
-            .filter(e => e instanceof Enemy)
-            .map(e => ({
-                x: e.x,
-                y: e.y,
-                hp: e.hp,
-                packSize: e.packSize || 1,
-                type: e.type || 'normal',
-                maxHp: e.maxHp || e.hp
-            })),
+        enemies: enemies.filter(e => e instanceof Enemy).map(e => ({
+            x: e.x,
+            y: e.y,
+            hp: e.hp,
+            packSize: e.packSize || 1,
+            type: e.type || 'normal',
+            maxHp: e.maxHp || e.hp,
+            lastShotFrame: e.lastShotFrame || 0,
+            angle: e.angle || 0,
+            width: e.width,
+            height: e.height,
+            speed: e.speed
+        })),
         gates: gates.map(g => ({
             x: g.x,
             y: g.y,
@@ -585,8 +583,18 @@ function saveGame() {
             passed: g.passed,
             readDelay: g.readDelay || 0
         })),
-        currentQuestionObj,
-        questionPauseTimer
+        boss: boss ? {
+            x: boss.x,
+            y: boss.y,
+            width: boss.width,
+            height: boss.height,
+            hp: boss.hp,
+            maxHp: boss.maxHp,
+            level: boss.level,
+            attackTimer: boss.attackTimer,
+            isDashing: boss.isDashing,
+            imageIndex: boss.imageIndex ?? -1
+        } : null
     };
 
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
@@ -733,6 +741,16 @@ class Player {
             count = Math.min(20, count * 2);
         }
 
+        let bulletDamage = 1;
+
+        if (feverActive) {
+            bulletDamage = 2;
+        }
+
+        if (this.soldiers >= 20000) {
+            bulletDamage += Math.floor((this.soldiers - 20000) / 20000) + 1;
+        }
+
         const useSpread = this.soldiers >= 100 || feverActive;
 
         for (let i = 0; i < count; i++) {
@@ -752,7 +770,7 @@ class Player {
                 startX += offset;
             }
 
-            bullets.push(new Bullet(startX, this.y, angle));
+            bullets.push(new Bullet(startX, this.y, angle, bulletDamage));
         }
 
         playSound('shoot');
@@ -760,20 +778,25 @@ class Player {
 }
 
 class Bullet {
-    constructor(x, y, angle = 0) {
+    constructor(x, y, angle = 0, damage = 1) {
         this.x = x;
         this.y = y;
         this.angle = angle;
+        this.damage = damage;
         this.radius = 4;
         this.speed = 15;
         this.markedForDeletion = false;
     }
+
     update() {
         this.x += Math.sin(this.angle) * this.speed;
         this.y -= Math.cos(this.angle) * this.speed;
 
-        if (this.y < 0 || this.x < 0 || this.x > GAME_WIDTH) this.markedForDeletion = true;
+        if (this.y < 0 || this.x < 0 || this.x > GAME_WIDTH) {
+            this.markedForDeletion = true;
+        }
     }
+
     draw() {
         ctx.save();
         ctx.translate(this.x, this.y);
@@ -1038,14 +1061,12 @@ class Gate {
         if (this.readDelay > 0) {
             ctx.fillStyle = 'rgba(241, 196, 15, 0.35)';
             ctx.fillRect(this.x + 5, this.y, this.width - 10, this.height);
-
             ctx.strokeStyle = '#f1c40f';
             ctx.lineWidth = 4;
             ctx.strokeRect(this.x + 5, this.y, this.width - 10, this.height);
         } else {
             ctx.fillStyle = 'rgba(52, 152, 219, 0.6)';
             ctx.fillRect(this.x + 5, this.y, this.width - 10, this.height);
-
             ctx.strokeStyle = '#2980b9';
             ctx.lineWidth = 3;
             ctx.strokeRect(this.x + 5, this.y, this.width - 10, this.height);
@@ -1237,6 +1258,7 @@ class EnemyBullet {
         this.markedForDeletion = false;
         this.color = type === 'laser' ? '#e74c3c' : '#FFD700';
     }
+
     update() {
         this.x += Math.cos(this.angle) * this.speed;
         this.y += Math.sin(this.angle) * this.speed;
@@ -1245,6 +1267,7 @@ class EnemyBullet {
             this.markedForDeletion = true;
         }
     }
+
     draw() {
         ctx.fillStyle = this.color;
         ctx.beginPath();
@@ -1263,7 +1286,6 @@ class Boss {
         this.height = 120;
         this.x = GAME_WIDTH / 2 - this.width / 2;
         this.y = -150;
-
         this.level = Math.floor(score / 2000) + 1;
         this.hp = 100 + (this.level * 50);
         this.maxHp = this.hp;
@@ -1272,6 +1294,7 @@ class Boss {
         this.isDashing = false;
 
         const rand = Math.floor(Math.random() * 5);
+        this.imageIndex = rand < 4 ? rand : -1;
         this.image = rand < 4 ? bossImgs[rand] : enemyImg;
     }
 
@@ -1383,8 +1406,8 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
     let line = '';
 
     for (let n = 0; n < words.length; n++) {
-        let testLine = line + words[n] + ' ';
-        let metrics = ctx.measureText(testLine);
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
         if (metrics.width > maxWidth && n > 0) {
             ctx.fillText(line, x, y);
             line = words[n] + ' ';
@@ -1406,11 +1429,13 @@ class Particle {
         this.speedY = Math.random() * 6 - 3;
         this.life = 100;
     }
+
     update() {
         this.x += this.speedX;
         this.y += this.speedY;
         this.life -= 2;
     }
+
     draw() {
         ctx.globalAlpha = this.life / 100;
         ctx.fillStyle = this.color;
@@ -1441,7 +1466,7 @@ function spawnGateRow() {
     let options = [];
     options.push({ text: qData.a, isCorrect: true });
 
-    let wrongPool = shuffle([...qData.w]);
+    const wrongPool = shuffle([...qData.w]);
     options.push({ text: wrongPool[0] || "오답", isCorrect: false });
     options.push({ text: wrongPool[1] || wrongPool[0] || "오답", isCorrect: false });
 
@@ -1558,9 +1583,12 @@ function checkCollisions() {
             );
 
             if (dist < Math.max(enemy.width, enemy.height) / 2 + bullet.radius) {
-                enemy.hp--;
+                enemy.hp -= bullet.damage;
                 bullet.markedForDeletion = true;
-                for (let i = 0; i < 3; i++) particles.push(new Particle(bullet.x, bullet.y, '#f1c40f'));
+
+                for (let i = 0; i < 3; i++) {
+                    particles.push(new Particle(bullet.x, bullet.y, '#f1c40f'));
+                }
 
                 if (enemy.hp <= 0) {
                     enemy.markedForDeletion = true;
@@ -1602,7 +1630,10 @@ function checkCollisions() {
             let collision = false;
 
             if (isBullet) {
-                const dist = Math.hypot(player.x + player.width / 2 - enemy.x, player.y + player.height / 2 - enemy.y);
+                const dist = Math.hypot(
+                    player.x + player.width / 2 - enemy.x,
+                    player.y + player.height / 2 - enemy.y
+                );
                 if (dist < (player.width / 2 + enemy.radius)) {
                     collision = true;
                 }
@@ -1626,8 +1657,7 @@ function checkCollisions() {
                     const currentLevel = Math.floor(score / 2000) + 1;
 
                     if (isBullet) {
-                        let baseDamage = enemy.type === 'laser' ? 100 : 30;
-
+                        const baseDamage = enemy.type === 'laser' ? 100 : 30;
                         if (currentLevel > 5) {
                             const ratio = enemy.type === 'laser' ? 0.3 : 0.1;
                             damage = Math.max(baseDamage, Math.floor(player.soldiers * ratio));
@@ -1729,6 +1759,7 @@ function drawRoad() {
     if (!bgImg.complete || bgImg.naturalWidth === 0) {
         ctx.fillStyle = '#34495e';
         ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.lineWidth = 4;
         ctx.setLineDash([20, 20]);
@@ -1906,10 +1937,12 @@ function animate() {
                 bullet.x > boss.x && bullet.x < boss.x + boss.width &&
                 bullet.y > boss.y && bullet.y < boss.y + boss.height
             ) {
-                boss.hp--;
+                boss.hp -= bullet.damage;
                 bullet.markedForDeletion = true;
 
-                for (let i = 0; i < 5; i++) particles.push(new Particle(bullet.x, bullet.y, '#f1c40f'));
+                for (let i = 0; i < 5; i++) {
+                    particles.push(new Particle(bullet.x, bullet.y, '#f1c40f'));
+                }
 
                 if (boss.hp <= 0) {
                     boss.markedForDeletion = true;
@@ -1962,24 +1995,24 @@ function animate() {
     score += 0.1;
     if (frameCount % 10 === 0) updateHUD();
 
-    if (!isBossBattleMode && gameSpeed < 1.8) {
-        gameSpeed += 0.0002;
-    }
+    const targetSpeed = Math.min(1.5, 1.2 + score * 0.00001);
+    gameSpeed += (targetSpeed - gameSpeed) * 0.02;
 
     frameCount++;
     requestAnimationFrame(animate);
 }
 
 /**
- * 제어 및 이벤트
+ * 제어
  */
 function handleInput(e) {
     if (gameState !== 'PLAYING') return;
-    let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     targetX = (clientX - rect.left) * scaleX - 20;
 }
+
 window.addEventListener('mousemove', handleInput);
 window.addEventListener('touchmove', handleInput, { passive: false });
 
@@ -2000,7 +2033,10 @@ window.addEventListener('keydown', (e) => {
 
 function startNewGame() {
     const nick = document.getElementById('nickname-input').value.trim();
-    if (!nick) { alert("닉네임을 입력해주세요!"); return; }
+    if (!nick) {
+        alert("닉네임을 입력해주세요!");
+        return;
+    }
 
     const storedNick = localStorage.getItem(CURRENT_NICKNAME_KEY);
     if (storedNick && storedNick !== nick) {
@@ -2036,26 +2072,36 @@ function loadGameAndStart() {
 
     const data = JSON.parse(saveDataStr);
 
-    score = data.score;
-    totalCorrect = data.totalCorrect;
-    totalWrong = data.totalWrong || 0;
-    consecutiveCorrect = data.consecutiveCorrect;
-    maxCombo = data.maxCombo;
-    nickname = data.nickname;
-    frameCount = data.frameCount;
-    nextGateFrame = data.nextGateFrame;
-    currentQuestionObj = data.currentQuestionObj;
-    storedBomb = data.storedBomb || 0;
-    storedFever = data.storedFever || 0;
-    bossSpawnScore = data.bossSpawnScore || 1000;
-    gameSpeed = data.gameSpeed || 1.2;
-    questionPauseTimer = data.questionPauseTimer || 0;
+    score = data.score ?? 0;
+    totalCorrect = data.totalCorrect ?? 0;
+    totalWrong = data.totalWrong ?? 0;
+    consecutiveCorrect = data.consecutiveCorrect ?? 0;
+    maxCombo = data.maxCombo ?? 0;
+    nickname = data.nickname ?? "학생";
+    frameCount = data.frameCount ?? 0;
+    nextGateFrame = data.nextGateFrame ?? 100;
+    storedBomb = data.storedBomb ?? 0;
+    storedFever = data.storedFever ?? 0;
+    bossSpawnScore = data.bossSpawnScore ?? 1000;
+    gameSpeed = data.gameSpeed ?? 1.2;
+    questionPauseTimer = data.questionPauseTimer ?? 0;
+    currentQuestionObj = data.currentQuestionObj ?? null;
+    shieldActive = data.shieldActive ?? false;
+    shieldTimer = data.shieldTimer ?? 0;
+    feverActive = data.feverActive ?? false;
+    feverTimer = data.feverTimer ?? 0;
+    bossCollisionCooldown = data.bossCollisionCooldown ?? 0;
 
     player = new Player(data.player?.x, data.player?.y, data.player?.soldiers);
 
     enemies = (data.enemies || []).map(e => {
         const enemy = new Enemy(e.x, e.y, e.hp, e.packSize || 1, e.type || 'normal', 1);
         enemy.maxHp = e.maxHp || e.hp;
+        enemy.lastShotFrame = e.lastShotFrame || 0;
+        enemy.angle = e.angle || 0;
+        if (e.width) enemy.width = e.width;
+        if (e.height) enemy.height = e.height;
+        if (e.speed) enemy.speed = e.speed;
         return enemy;
     });
 
@@ -2063,8 +2109,24 @@ function loadGameAndStart() {
         g.x, g.width, g.text, g.isCorrect, g.passed, g.y, g.readDelay || 0
     ));
 
-    targetX = player.x;
+    if (data.boss) {
+        boss = new Boss();
+        boss.x = data.boss.x;
+        boss.y = data.boss.y;
+        boss.width = data.boss.width;
+        boss.height = data.boss.height;
+        boss.hp = data.boss.hp;
+        boss.maxHp = data.boss.maxHp;
+        boss.level = data.boss.level;
+        boss.attackTimer = data.boss.attackTimer;
+        boss.isDashing = data.boss.isDashing;
+        boss.imageIndex = data.boss.imageIndex;
+        boss.image = boss.imageIndex >= 0 ? bossImgs[boss.imageIndex] : enemyImg;
+    } else {
+        boss = null;
+    }
 
+    targetX = player.x;
     startGameCommon();
 }
 
@@ -2174,7 +2236,6 @@ function hideRecords() {
 
 function initStartScreen() {
     const storedNick = localStorage.getItem(CURRENT_NICKNAME_KEY);
-
     if (storedNick) {
         document.getElementById('nickname-input').value = storedNick;
     }
