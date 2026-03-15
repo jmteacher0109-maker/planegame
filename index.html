@@ -469,16 +469,13 @@ function shuffle(array) {
 }
 
 function getCurrentBulletDamage() {
-    if (!player) return 1;
+    if (!player) return 2;
 
-    let bulletDamage = 1;
+    // 초반부터 데미지가 강해지도록 수정
+    let bulletDamage = 2 + Math.floor(player.soldiers / 2500);
 
     if (feverActive) {
-        bulletDamage = 2;
-    }
-
-    if (player.soldiers >= 20000) {
-        bulletDamage += Math.floor((player.soldiers - 20000) / 20000) + 1;
+        bulletDamage += 2;
     }
 
     bulletDamage = Math.min(10, bulletDamage);
@@ -611,7 +608,9 @@ function saveGame() {
             level: boss.level,
             attackTimer: boss.attackTimer,
             isDashing: boss.isDashing,
-            imageIndex: boss.imageIndex ?? -1
+            imageIndex: boss.imageIndex ?? -1,
+            dashCount: boss.dashCount ?? 0,
+            maxDashCount: boss.maxDashCount ?? 0
         } : null
     };
 
@@ -767,8 +766,9 @@ class Player {
             let startX = this.x + this.width / 2;
 
             if (useSpread) {
-                let spreadFactor = Math.min(1.2, 0.3 + (this.soldiers / 10000));
-                if (feverActive) spreadFactor = 1.5;
+                // 총알 호 범위 축소
+                let spreadFactor = Math.min(0.45, 0.12 + (this.soldiers / 30000));
+                if (feverActive) spreadFactor = Math.min(0.6, spreadFactor + 0.1);
 
                 if (count > 1) {
                     angle = -spreadFactor / 2 + (spreadFactor / (count - 1)) * i;
@@ -1302,13 +1302,18 @@ class Boss {
         this.y = -150;
         this.level = Math.floor(score / 2000) + 1;
 
+        // 보스 체력 10배
         const bossBaseHp = Math.max(120, Math.floor(score * 0.12));
-        this.hp = bossBaseHp + (this.level * 40);
+        this.hp = (bossBaseHp + (this.level * 40)) * 10;
         this.maxHp = this.hp;
 
         this.markedForDeletion = false;
         this.attackTimer = 0;
         this.isDashing = false;
+
+        // 돌진 횟수 증가 관련
+        this.dashCount = 0;
+        this.maxDashCount = Math.max(3, 2 + this.level);
 
         const rand = Math.floor(Math.random() * 5);
         this.imageIndex = rand < 4 ? rand : -1;
@@ -1365,8 +1370,10 @@ class Boss {
             }
         }
 
-        if (this.level >= 4 && Math.random() < 0.35) {
+        // 돌진 확률 + 누적 돌진 횟수 증가
+        if (this.level >= 4 && this.dashCount < this.maxDashCount && Math.random() < 0.65) {
             this.isDashing = true;
+            this.dashCount++;
             createFloatingText("DASH!", this.x + this.width / 2, this.y, "red");
             playSound('boss-dash');
         }
@@ -1665,29 +1672,31 @@ function checkCollisions() {
                     const currentLevel = Math.floor(score / 2000) + 1;
 
                     if (isBullet) {
-                        const baseDamage = enemy.type === 'laser' ? 100 : 30;
+                        // 적 탄 충돌 데미지 상향
+                        const baseDamage = enemy.type === 'laser' ? 150 : 45;
                         if (currentLevel > 5) {
-                            const ratio = enemy.type === 'laser' ? 0.3 : 0.1;
+                            const ratio = enemy.type === 'laser' ? 0.35 : 0.15;
                             damage = Math.max(baseDamage, Math.floor(player.soldiers * ratio));
                         } else {
                             damage = baseDamage;
                         }
                     } else {
-                        let baseDamage = 10;
+                        // 직접 충돌 데미지 상향
+                        let baseDamage = 18;
 
-                        if (enemy.type === 'pack') baseDamage = 10 * Math.max(1, enemy.packSize);
-                        else if (enemy.type === 'tank') baseDamage = 45;
-                        else if (enemy.type === 'speed') baseDamage = 10;
-                        else if (enemy.type === 'zigzag') baseDamage = 20;
-                        else if (enemy.type === 'armor') baseDamage = 60;
-                        else if (enemy.type === 'splitter') baseDamage = 25;
-                        else if (enemy.type === 'shooter') baseDamage = 35;
+                        if (enemy.type === 'pack') baseDamage = 18 * Math.max(1, enemy.packSize);
+                        else if (enemy.type === 'tank') baseDamage = 70;
+                        else if (enemy.type === 'speed') baseDamage = 18;
+                        else if (enemy.type === 'zigzag') baseDamage = 32;
+                        else if (enemy.type === 'armor') baseDamage = 90;
+                        else if (enemy.type === 'splitter') baseDamage = 40;
+                        else if (enemy.type === 'shooter') baseDamage = 50;
 
                         if (currentLevel > 5) {
-                            let ratio = 0.2;
-                            if (enemy.type === 'tank') ratio = 0.35;
-                            else if (enemy.type === 'armor') ratio = 0.4;
-                            else if (enemy.type === 'shooter') ratio = 0.25;
+                            let ratio = 0.24;
+                            if (enemy.type === 'tank') ratio = 0.38;
+                            else if (enemy.type === 'armor') ratio = 0.45;
+                            else if (enemy.type === 'shooter') ratio = 0.3;
                             damage = Math.max(baseDamage, Math.floor(player.soldiers * ratio));
                         } else {
                             damage = baseDamage;
@@ -1990,9 +1999,9 @@ function animate() {
 
                 if (boss.isDashing) {
                     if (currentLevel > 5) {
-                        damage = Math.max(300, Math.floor(player.soldiers * 0.5));
+                        damage = Math.max(350, Math.floor(player.soldiers * 0.55));
                     } else {
-                        damage = 300;
+                        damage = 350;
                     }
 
                     bossCollisionCooldown = 30;
@@ -2134,6 +2143,8 @@ function loadGameAndStart() {
         boss.isDashing = data.boss.isDashing;
         boss.imageIndex = data.boss.imageIndex;
         boss.image = boss.imageIndex >= 0 ? bossImgs[boss.imageIndex] : enemyImg;
+        boss.dashCount = data.boss.dashCount ?? 0;
+        boss.maxDashCount = data.boss.maxDashCount ?? Math.max(3, 2 + boss.level);
     } else {
         boss = null;
     }
