@@ -202,7 +202,7 @@
     <audio id="sfx-boss-dash"><source src="lazercannon-37980.mp3" type="audio/mp3" /></audio>
 
     <button id="bgm-btn" onclick="toggleSound()">🎵 소리: OFF</button>
-    <div class="version-text">라스트 노바: 인류의 마지막 빛 made by gamtudyssam 0.0017</div>
+    <div class="version-text">라스트 노바: 인류의 마지막 빛 made by gamtudyssam 0.0018</div>
 
     <canvas id="gameCanvas"></canvas>
 
@@ -210,6 +210,7 @@
         <div class="stat-item">점수: <span id="hud-score">0</span></div>
         <div class="stat-item">정답: <span id="hud-total">0</span></div>
         <div class="stat-item combo-text" id="hud-combo">Combo: 0</div>
+        <div class="stat-item">공격력: <span id="hud-damage">1</span></div>
         <div class="stat-item">붐: <span id="hud-bomb">0</span> (B키)</div>
         <div class="stat-item">피버: <span id="hud-fever">0</span> (F키)</div>
 
@@ -446,7 +447,7 @@ let nextGateFrame = 0;
 let player;
 let targetX;
 
-const GATE_READ_DELAY = 180; // 3초
+const GATE_READ_DELAY = 180;
 let questionPauseTimer = 0;
 
 let storedBomb = 0;
@@ -467,10 +468,27 @@ function shuffle(array) {
     return array;
 }
 
-const SAVE_KEY = 'weatherRun_save_local_v3';
-const RECORD_KEY = 'weatherRun_records_local_v3';
-const STATS_KEY = 'weatherRun_stats_local_v2';
-const CURRENT_NICKNAME_KEY = 'weatherRun_current_nickname_v2';
+function getCurrentBulletDamage() {
+    if (!player) return 1;
+
+    let bulletDamage = 1;
+
+    if (feverActive) {
+        bulletDamage = 2;
+    }
+
+    if (player.soldiers >= 20000) {
+        bulletDamage += Math.floor((player.soldiers - 20000) / 20000) + 1;
+    }
+
+    bulletDamage = Math.min(10, bulletDamage);
+    return bulletDamage;
+}
+
+const SAVE_KEY = 'weatherRun_save_local_v4';
+const RECORD_KEY = 'weatherRun_records_local_v4';
+const STATS_KEY = 'weatherRun_stats_local_v3';
+const CURRENT_NICKNAME_KEY = 'weatherRun_current_nickname_v3';
 const SECRET_SALT = "science_run_secret_salt_2025";
 
 function generateHash(data) {
@@ -741,16 +759,7 @@ class Player {
             count = Math.min(20, count * 2);
         }
 
-        let bulletDamage = 1;
-
-        if (feverActive) {
-            bulletDamage = 2;
-        }
-
-        if (this.soldiers >= 20000) {
-            bulletDamage += Math.floor((this.soldiers - 20000) / 20000) + 1;
-        }
-
+        let bulletDamage = getCurrentBulletDamage();
         const useSpread = this.soldiers >= 100 || feverActive;
 
         for (let i = 0; i < count; i++) {
@@ -849,24 +858,32 @@ class Enemy {
             this.speed = gameSpeed + 0.8 + Math.random() * 1.2;
         }
 
-        const baseHp = 3;
+        const scaledBaseHp = Math.max(3, Math.floor(score * 0.01));
 
         if (hp !== null && hp !== undefined) {
             this.hp = hp;
         } else {
-            this.hp = baseHp * this.packSize * hpMultiplier;
-
             if (this.type === 'normal') {
-                this.hp = Math.max(3, Math.floor(score * 0.01));
+                this.hp = scaledBaseHp;
+            } else if (this.type === 'speed') {
+                this.hp = Math.max(2, Math.floor(scaledBaseHp * 0.7));
+            } else if (this.type === 'zigzag') {
+                this.hp = Math.max(4, Math.floor(scaledBaseHp * 1.4));
+            } else if (this.type === 'tank') {
+                this.hp = Math.max(10, Math.floor(scaledBaseHp * 4.5));
+            } else if (this.type === 'pack') {
+                this.hp = scaledBaseHp * this.packSize;
+            } else if (this.type === 'armor') {
+                this.hp = Math.max(15, Math.floor(scaledBaseHp * 6));
+            } else if (this.type === 'splitter') {
+                this.hp = Math.max(6, Math.floor(scaledBaseHp * 1.8));
+            } else if (this.type === 'shooter') {
+                this.hp = Math.max(8, Math.floor(scaledBaseHp * 2.2));
+            } else {
+                this.hp = scaledBaseHp;
             }
 
-            if (this.type === 'armor') {
-                this.hp = 24 + Math.floor(score / 3000) * 2;
-            } else if (this.type === 'splitter') {
-                this.hp = 8 + Math.floor(score / 5000);
-            } else if (this.type === 'shooter') {
-                this.hp = 10 + Math.floor(score / 4000);
-            }
+            this.hp = Math.max(1, Math.floor(this.hp * hpMultiplier));
         }
 
         this.maxHp = this.hp;
@@ -1008,8 +1025,7 @@ class Enemy {
             ctx.fillStyle = 'white';
             ctx.font = 'bold 14px Arial';
             ctx.textAlign = 'center';
-            const currentPackCount = Math.ceil(this.hp / 3);
-            ctx.fillText(`x${currentPackCount}`, this.x + this.width / 2, this.y - 10);
+            ctx.fillText(`x${this.packSize}`, this.x + this.width / 2, this.y - 10);
 
         } else {
             if (enemyImg.complete && enemyImg.naturalWidth > 0) {
@@ -1021,13 +1037,11 @@ class Enemy {
                 ctx.fillRect(this.x, this.y, this.width, this.height);
             }
 
-            if (this.type === 'normal') {
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 12px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(`HP ${Math.ceil(this.hp)}`, this.x + this.width / 2, this.y - 10);
-            }
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`HP ${Math.ceil(this.hp)}`, this.x + this.width / 2, this.y - 10);
         }
 
         ctx.restore();
@@ -1287,8 +1301,11 @@ class Boss {
         this.x = GAME_WIDTH / 2 - this.width / 2;
         this.y = -150;
         this.level = Math.floor(score / 2000) + 1;
-        this.hp = 100 + (this.level * 50);
+
+        const bossBaseHp = Math.max(120, Math.floor(score * 0.12));
+        this.hp = bossBaseHp + (this.level * 40);
         this.maxHp = this.hp;
+
         this.markedForDeletion = false;
         this.attackTimer = 0;
         this.isDashing = false;
@@ -1300,7 +1317,8 @@ class Boss {
 
     update() {
         if (this.isDashing) {
-            this.y += 15;
+            this.y += 13;
+
             if (this.y > GAME_HEIGHT) {
                 this.y = -200;
                 this.isDashing = false;
@@ -1347,7 +1365,7 @@ class Boss {
             }
         }
 
-        if (this.level >= 4 && Math.random() < 0.2) {
+        if (this.level >= 4 && Math.random() < 0.35) {
             this.isDashing = true;
             createFloatingText("DASH!", this.x + this.width / 2, this.y, "red");
             playSound('boss-dash');
@@ -1383,6 +1401,10 @@ class Boss {
         ctx.font = 'bold 16px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(`Lv.${this.level}`, this.x + this.width / 2, this.y - 25);
+
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(`${Math.ceil(this.hp)} / ${Math.ceil(this.maxHp)}`, this.x + this.width / 2, this.y - 35);
 
         ctx.restore();
     }
@@ -1496,13 +1518,13 @@ function spawnEnemy() {
                 type = 'shooter';
             } else if (rand < 0.62) {
                 type = 'tank';
-                hpMultiplier = 5;
+                hpMultiplier = 1;
             } else if (rand < 0.74) {
                 type = 'speed';
-                hpMultiplier = 0.5;
+                hpMultiplier = 1;
             } else if (rand < 0.86) {
                 type = 'zigzag';
-                hpMultiplier = 1.5;
+                hpMultiplier = 1;
             } else {
                 packSize = Math.floor(Math.random() * 3) + 2;
                 type = 'pack';
@@ -1513,13 +1535,10 @@ function spawnEnemy() {
 
             if (rand < 0.2) {
                 type = 'tank';
-                hpMultiplier = 5;
             } else if (rand < 0.4) {
                 type = 'speed';
-                hpMultiplier = 0.5;
             } else if (rand < 0.6) {
                 type = 'zigzag';
-                hpMultiplier = 1.5;
             } else if (rand < 0.7) {
                 packSize = Math.floor(Math.random() * 3) + 2;
                 type = 'pack';
@@ -1530,13 +1549,10 @@ function spawnEnemy() {
 
             if (rand < 0.2) {
                 type = 'tank';
-                hpMultiplier = 5;
             } else if (rand < 0.4) {
                 type = 'speed';
-                hpMultiplier = 0.5;
             } else if (rand < 0.6) {
                 type = 'zigzag';
-                hpMultiplier = 1.5;
             }
         }
 
@@ -1545,20 +1561,12 @@ function spawnEnemy() {
         if (score >= 15000 && Math.random() < 0.18) {
             const extraTypeRand = Math.random();
             let extraType = 'normal';
-            let extraHpMultiplier = 1;
 
             if (extraTypeRand < 0.25) extraType = 'normal';
-            else if (extraTypeRand < 0.45) {
-                extraType = 'speed';
-                extraHpMultiplier = 0.5;
-            } else if (extraTypeRand < 0.65) {
-                extraType = 'zigzag';
-                extraHpMultiplier = 1.5;
-            } else if (extraTypeRand < 0.82) {
-                extraType = 'splitter';
-            } else {
-                extraType = 'shooter';
-            }
+            else if (extraTypeRand < 0.45) extraType = 'speed';
+            else if (extraTypeRand < 0.65) extraType = 'zigzag';
+            else if (extraTypeRand < 0.82) extraType = 'splitter';
+            else extraType = 'shooter';
 
             enemies.push(new Enemy(
                 Math.random() * (GAME_WIDTH - 40),
@@ -1566,7 +1574,7 @@ function spawnEnemy() {
                 null,
                 1,
                 extraType,
-                extraHpMultiplier
+                1
             ));
         }
     }
@@ -1605,8 +1613,8 @@ function checkCollisions() {
                     }
 
                     if (enemy.type === 'splitter') {
-                        const child1 = new Enemy(enemy.x - 10, enemy.y, 3, 1, 'speed', 0.5);
-                        const child2 = new Enemy(enemy.x + 10, enemy.y, 3, 1, 'speed', 0.5);
+                        const child1 = new Enemy(enemy.x - 10, enemy.y, Math.max(3, Math.floor(score * 0.006)), 1, 'speed', 1);
+                        const child2 = new Enemy(enemy.x + 10, enemy.y, Math.max(3, Math.floor(score * 0.006)), 1, 'speed', 1);
 
                         child1.width = 28;
                         child1.height = 28;
@@ -1665,15 +1673,21 @@ function checkCollisions() {
                             damage = baseDamage;
                         }
                     } else {
-                        const currentPackCount = Math.ceil(enemy.hp / 3) || 1;
-                        let baseDamage = 10 * currentPackCount;
+                        let baseDamage = 10;
 
-                        if (enemy.type === 'armor') baseDamage = 60;
+                        if (enemy.type === 'pack') baseDamage = 10 * Math.max(1, enemy.packSize);
+                        else if (enemy.type === 'tank') baseDamage = 45;
+                        else if (enemy.type === 'speed') baseDamage = 10;
+                        else if (enemy.type === 'zigzag') baseDamage = 20;
+                        else if (enemy.type === 'armor') baseDamage = 60;
                         else if (enemy.type === 'splitter') baseDamage = 25;
                         else if (enemy.type === 'shooter') baseDamage = 35;
 
                         if (currentLevel > 5) {
-                            const ratio = 0.2 * currentPackCount;
+                            let ratio = 0.2;
+                            if (enemy.type === 'tank') ratio = 0.35;
+                            else if (enemy.type === 'armor') ratio = 0.4;
+                            else if (enemy.type === 'shooter') ratio = 0.25;
                             damage = Math.max(baseDamage, Math.floor(player.soldiers * ratio));
                         } else {
                             damage = baseDamage;
@@ -1737,6 +1751,7 @@ function updateHUD() {
     document.getElementById('hud-score').innerText = Math.floor(score);
     document.getElementById('hud-total').innerText = totalCorrect;
     document.getElementById('hud-combo').innerText = `Combo: ${consecutiveCorrect}`;
+    document.getElementById('hud-damage').innerText = getCurrentBulletDamage();
     document.getElementById('hud-bomb').innerText = storedBomb;
     document.getElementById('hud-fever').innerText = storedFever;
 }
@@ -1980,7 +1995,7 @@ function animate() {
                         damage = 300;
                     }
 
-                    bossCollisionCooldown = 45;
+                    bossCollisionCooldown = 30;
                     createFloatingText("CRITICAL!", player.x, player.y, "red");
                     player.soldiers -= damage;
                     createFloatingText(`-${damage}`, player.x, player.y, "red");
@@ -2002,9 +2017,6 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-/**
- * 제어
- */
 function handleInput(e) {
     if (gameState !== 'PLAYING') return;
     const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
