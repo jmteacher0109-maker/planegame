@@ -1304,7 +1304,7 @@ class Boss {
 
         // 보스 체력 10배
         const bossBaseHp = Math.max(120, Math.floor(score * 0.12));
-        this.hp = (bossBaseHp + (this.level * 40)) * 10;
+        this.hp = (bossBaseHp + (this.level * 40));
         this.maxHp = this.hp;
 
         this.markedForDeletion = false;
@@ -1371,7 +1371,7 @@ class Boss {
         }
 
         // 돌진 확률 + 누적 돌진 횟수 증가
-        if (this.level >= 4 && this.dashCount < this.maxDashCount && Math.random() < 0.65) {
+        if (this.level >= 2 && this.dashCount < this.maxDashCount && Math.random() < 0.65) {
             this.isDashing = true;
             this.dashCount++;
             createFloatingText("DASH!", this.x + this.width / 2, this.y, "red");
