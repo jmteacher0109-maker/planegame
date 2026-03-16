@@ -317,7 +317,7 @@ const QUESTIONS = [];
 let gameState = 'START';
 let frameCount = 0;
 let score = 0;
-let gameSpeed = 0.5;
+let gameSpeed = 1.0;
 let isBossBattleMode = false;
 let scrollOffset = 0;
 
@@ -745,7 +745,7 @@ class Enemy {
         this.x = x ?? Math.random() * (GAME_WIDTH - 40);
         this.y = y ?? -50;
         this.type = type;
-        this.speed = gameSpeed + 1 + Math.random() * 2;
+        this.speed = gameSpeed* (0.9+Math.random()* 0.4);
         this.packSize = packSize;
         this.markedForDeletion = false;
         this.color = '#e74c3c';
@@ -755,19 +755,19 @@ class Enemy {
         if (this.type === 'tank') {
             this.width = 60;
             this.height = 60;
-            this.speed = gameSpeed * 0.8 + 0.5;
+            this.speed = gameSpeed * 0.75;
         } else if (this.type === 'speed') {
-            this.speed = gameSpeed * 1.5 + 3;
+            this.speed = gameSpeed * 1.8;
         } else if (this.type === 'armor') {
             this.width = 65;
             this.height = 65;
             this.speed = gameSpeed * 0.75 + 0.5;
         } else if (this.type === 'splitter') {
-            this.speed = gameSpeed + 1.5 + Math.random() * 2;
+            this.speed = gameSpeed *(1.1 + Math.random() * 0.3);
         } else if (this.type === 'shooter') {
             this.width = 45;
             this.height = 45;
-            this.speed = gameSpeed + 0.8 + Math.random() * 1.2;
+            this.speed = gameSpeed* (0.95 + Math.random() * 0.3);
         }
 
         const scaledBaseHp = getScaledBaseHp();
@@ -1515,8 +1515,8 @@ function checkCollisions() {
                         child2.width = 28;
                         child2.height = 28;
 
-                        child1.speed = gameSpeed * 1.8 + 3;
-                        child2.speed = gameSpeed * 1.8 + 3;
+                        child1.speed = gameSpeed * 1.6;
+                        child2.speed = gameSpeed * 1.6;
 
                         enemies.push(child1, child2);
                         createFloatingText("SPLIT!", enemy.x + enemy.width / 2, enemy.y, "#9b59b6");
