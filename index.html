@@ -170,6 +170,7 @@
             font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.2s;
+            pointer-events: auto;
         }
         #bgm-btn:hover {
             background: rgba(255, 255, 255, 0.2);
@@ -201,7 +202,7 @@
     <audio id="sfx-small-explosion"><source src="small-explosion-103931.mp3" type="audio/mp3" /></audio>
     <audio id="sfx-boss-dash"><source src="lazercannon-37980.mp3" type="audio/mp3" /></audio>
 
-    <button id="bgm-btn" onclick="toggleSound()">🎵 소리: OFF</button>
+    <button id="bgm-btn">🎵 소리: OFF</button>
     <div class="version-text">라스트 노바: 인류의 마지막 빛 made by gamtudyssam 0.0019</div>
 
     <canvas id="gameCanvas"></canvas>
@@ -238,12 +239,12 @@
 
                 <div id="resume-area" class="hidden">
                     <p style="color: #e67e22;">저장된 게임이 있습니다!</p>
-                    <button class="green" onclick="loadGameAndStart()">이어하기</button>
+                    <button id="resume-btn" class="green" type="button">이어하기</button>
                 </div>
 
                 <div>
-                    <button onclick="startNewGame()">새 게임 시작</button>
-                    <button class="secondary" onclick="showRecords()">나의 기록 보기</button>
+                    <button id="start-game-btn" type="button">새 게임 시작</button>
+                    <button id="show-records-btn" class="secondary" type="button">나의 기록 보기</button>
                 </div>
             </div>
         </div>
@@ -258,7 +259,7 @@
                     <tbody></tbody>
                 </table>
             </div>
-            <button class="secondary" onclick="hideRecords()">닫기</button>
+            <button id="close-records-btn" class="secondary" type="button">닫기</button>
         </div>
 
         <div id="game-over-screen" class="popup hidden">
@@ -266,7 +267,7 @@
             <p id="final-msg">수고했습니다!</p>
             <p id="final-score-text">점수: 0</p>
             <p id="final-stats-text">총 정답: 0 / 최대 콤보: 0</p>
-            <button onclick="returnToMain()">메인으로</button>
+            <button id="return-main-btn" type="button">메인으로</button>
         </div>
     </div>
 
@@ -302,14 +303,107 @@ itemImgs.fever.src = 'fever.png';
 const bgImg = new Image();
 bgImg.src = '미래 도시 풍경의 반전.png';
 
-/*
-  문제는 여기에 넣어 주세요.
-  예시:
-  const QUESTIONS = [
-    { q: "2 + 3 = ?", a: "5", w: ["4", "6"] }
-  ];
-*/
-const QUESTIONS = [];
+const QUESTIONS = [
+  {"q":"12 × 3 = ?","a":"36","w":["26","46"]},
+  {"q":"14 × 2 = ?","a":"28","w":["24","32"]},
+  {"q":"15 × 4 = ?","a":"60","w":["50","70"]},
+  {"q":"16 × 3 = ?","a":"48","w":["38","58"]},
+  {"q":"17 × 5 = ?","a":"85","w":["75","95"]},
+  {"q":"18 × 2 = ?","a":"36","w":["34","38"]},
+  {"q":"19 × 4 = ?","a":"76","w":["66","86"]},
+  {"q":"21 × 3 = ?","a":"63","w":["53","73"]},
+  {"q":"22 × 4 = ?","a":"88","w":["78","98"]},
+  {"q":"23 × 2 = ?","a":"46","w":["44","48"]},
+  {"q":"24 × 3 = ?","a":"72","w":["62","82"]},
+  {"q":"25 × 4 = ?","a":"100","w":["90","110"]},
+  {"q":"26 × 2 = ?","a":"52","w":["42","62"]},
+  {"q":"27 × 3 = ?","a":"81","w":["71","91"]},
+  {"q":"28 × 5 = ?","a":"140","w":["130","150"]},
+  {"q":"29 × 2 = ?","a":"58","w":["48","68"]},
+  {"q":"31 × 3 = ?","a":"93","w":["83","103"]},
+  {"q":"32 × 2 = ?","a":"64","w":["54","74"]},
+  {"q":"33 × 4 = ?","a":"132","w":["122","142"]},
+  {"q":"34 × 3 = ?","a":"102","w":["92","112"]},
+  {"q":"35 × 2 = ?","a":"70","w":["60","80"]},
+  {"q":"36 × 4 = ?","a":"144","w":["134","154"]},
+  {"q":"37 × 3 = ?","a":"111","w":["101","121"]},
+  {"q":"38 × 2 = ?","a":"76","w":["66","86"]},
+  {"q":"39 × 5 = ?","a":"195","w":["185","205"]},
+  {"q":"41 × 2 = ?","a":"82","w":["72","92"]},
+  {"q":"42 × 3 = ?","a":"126","w":["116","136"]},
+  {"q":"43 × 4 = ?","a":"172","w":["162","182"]},
+  {"q":"44 × 2 = ?","a":"88","w":["78","98"]},
+  {"q":"45 × 3 = ?","a":"135","w":["125","145"]},
+  {"q":"46 × 2 = ?","a":"92","w":["82","102"]},
+  {"q":"47 × 4 = ?","a":"188","w":["178","198"]},
+  {"q":"48 × 3 = ?","a":"144","w":["134","154"]},
+  {"q":"49 × 2 = ?","a":"98","w":["88","108"]},
+  {"q":"51 × 3 = ?","a":"153","w":["143","163"]},
+  {"q":"52 × 4 = ?","a":"208","w":["198","218"]},
+  {"q":"53 × 2 = ?","a":"106","w":["96","116"]},
+  {"q":"54 × 3 = ?","a":"162","w":["152","172"]},
+  {"q":"55 × 2 = ?","a":"110","w":["100","120"]},
+  {"q":"56 × 4 = ?","a":"224","w":["214","234"]},
+  {"q":"57 × 3 = ?","a":"171","w":["161","181"]},
+  {"q":"58 × 2 = ?","a":"116","w":["106","126"]},
+  {"q":"59 × 5 = ?","a":"295","w":["285","305"]},
+  {"q":"61 × 2 = ?","a":"122","w":["112","132"]},
+  {"q":"62 × 3 = ?","a":"186","w":["176","196"]},
+  {"q":"63 × 4 = ?","a":"252","w":["242","262"]},
+  {"q":"64 × 2 = ?","a":"128","w":["118","138"]},
+  {"q":"65 × 3 = ?","a":"195","w":["185","205"]},
+  {"q":"66 × 2 = ?","a":"132","w":["122","142"]},
+  {"q":"67 × 4 = ?","a":"268","w":["258","278"]},
+  {"q":"68 × 3 = ?","a":"204","w":["194","214"]},
+  {"q":"69 × 2 = ?","a":"138","w":["128","148"]},
+  {"q":"71 × 3 = ?","a":"213","w":["203","223"]},
+  {"q":"72 × 4 = ?","a":"288","w":["278","298"]},
+  {"q":"73 × 2 = ?","a":"146","w":["136","156"]},
+  {"q":"74 × 3 = ?","a":"222","w":["212","232"]},
+  {"q":"75 × 2 = ?","a":"150","w":["140","160"]},
+  {"q":"76 × 4 = ?","a":"304","w":["294","314"]},
+  {"q":"77 × 3 = ?","a":"231","w":["221","241"]},
+  {"q":"78 × 2 = ?","a":"156","w":["146","166"]},
+  {"q":"79 × 5 = ?","a":"395","w":["385","405"]},
+  {"q":"81 × 2 = ?","a":"162","w":["152","172"]},
+  {"q":"82 × 3 = ?","a":"246","w":["236","256"]},
+  {"q":"83 × 4 = ?","a":"332","w":["322","342"]},
+  {"q":"84 × 2 = ?","a":"168","w":["158","178"]},
+  {"q":"85 × 3 = ?","a":"255","w":["245","265"]},
+  {"q":"86 × 2 = ?","a":"172","w":["162","182"]},
+  {"q":"87 × 4 = ?","a":"348","w":["338","358"]},
+  {"q":"88 × 3 = ?","a":"264","w":["254","274"]},
+  {"q":"89 × 2 = ?","a":"178","w":["168","188"]},
+  {"q":"91 × 3 = ?","a":"273","w":["263","283"]},
+  {"q":"92 × 4 = ?","a":"368","w":["358","378"]},
+  {"q":"93 × 2 = ?","a":"186","w":["176","196"]},
+  {"q":"94 × 3 = ?","a":"282","w":["272","292"]},
+  {"q":"95 × 2 = ?","a":"190","w":["180","200"]},
+  {"q":"96 × 4 = ?","a":"384","w":["374","394"]},
+  {"q":"97 × 3 = ?","a":"291","w":["281","301"]},
+  {"q":"98 × 2 = ?","a":"196","w":["186","206"]},
+  {"q":"99 × 5 = ?","a":"495","w":["485","505"]},
+  {"q":"13 × 6 = ?","a":"78","w":["68","88"]},
+  {"q":"22 × 5 = ?","a":"110","w":["100","120"]},
+  {"q":"34 × 5 = ?","a":"170","w":["160","180"]},
+  {"q":"46 × 5 = ?","a":"230","w":["220","240"]},
+  {"q":"58 × 4 = ?","a":"232","w":["222","242"]},
+  {"q":"67 × 5 = ?","a":"335","w":["325","345"]},
+  {"q":"74 × 4 = ?","a":"296","w":["286","306"]},
+  {"q":"83 × 5 = ?","a":"415","w":["405","425"]},
+  {"q":"92 × 5 = ?","a":"460","w":["450","470"]},
+  {"q":"27 × 6 = ?","a":"162","w":["152","172"]},
+  {"q":"35 × 6 = ?","a":"210","w":["200","220"]},
+  {"q":"48 × 6 = ?","a":"288","w":["278","298"]},
+  {"q":"56 × 5 = ?","a":"280","w":["270","290"]},
+  {"q":"63 × 6 = ?","a":"378","w":["368","388"]},
+  {"q":"72 × 5 = ?","a":"360","w":["350","370"]},
+  {"q":"84 × 6 = ?","a":"504","w":["494","514"]},
+  {"q":"18 × 7 = ?","a":"126","w":["116","136"]},
+  {"q":"26 × 7 = ?","a":"182","w":["172","192"]},
+  {"q":"41 × 6 = ?","a":"246","w":["236","256"]},
+  {"q":"53 × 7 = ?","a":"371","w":["361","381"]}
+];
 
 /**
  * 게임 상태
@@ -317,7 +411,7 @@ const QUESTIONS = [];
 let gameState = 'START';
 let frameCount = 0;
 let score = 0;
-let gameSpeed = 1.0;
+let gameSpeed = 1.2;
 let isBossBattleMode = false;
 let scrollOffset = 0;
 
@@ -376,31 +470,22 @@ function shuffle(array) {
 }
 
 function getCurrentBulletDamage() {
-    if (!player) return 1;
+    if (!player) return 2;
 
-    let bulletDamage = 1;
+    let bulletDamage = 2 + Math.floor(player.soldiers / 2500);
 
     if (feverActive) {
-        bulletDamage = 2;
+        bulletDamage += 2;
     }
 
-    if (player.soldiers >= 20000) {
-        bulletDamage += Math.floor((player.soldiers - 20000) / 20000) + 1;
-    }
-
-    return Math.min(10, bulletDamage);
+    bulletDamage = Math.min(10, bulletDamage);
+    return bulletDamage;
 }
 
-function getScaledBaseHp() {
-    return score >= 10000
-        ? Math.max(3, Math.floor(score * 0.01))
-        : Math.max(3, Math.floor(score * 0.005));
-}
-
-const SAVE_KEY = 'weatherRun_save_local_v5';
-const RECORD_KEY = 'weatherRun_records_local_v5';
-const STATS_KEY = 'weatherRun_stats_local_v4';
-const CURRENT_NICKNAME_KEY = 'weatherRun_current_nickname_v4';
+const SAVE_KEY = 'weatherRun_save_local_v4';
+const RECORD_KEY = 'weatherRun_records_local_v4';
+const STATS_KEY = 'weatherRun_stats_local_v3';
+const CURRENT_NICKNAME_KEY = 'weatherRun_current_nickname_v3';
 const SECRET_SALT = "science_run_secret_salt_2025";
 
 function generateHash(data) {
@@ -523,7 +608,9 @@ function saveGame() {
             level: boss.level,
             attackTimer: boss.attackTimer,
             isDashing: boss.isDashing,
-            imageIndex: boss.imageIndex ?? -1
+            imageIndex: boss.imageIndex ?? -1,
+            dashCount: boss.dashCount ?? 0,
+            maxDashCount: boss.maxDashCount ?? 0
         } : null
     };
 
@@ -671,7 +758,7 @@ class Player {
             count = Math.min(20, count * 2);
         }
 
-        const bulletDamage = getCurrentBulletDamage();
+        let bulletDamage = getCurrentBulletDamage();
         const useSpread = this.soldiers >= 100 || feverActive;
 
         for (let i = 0; i < count; i++) {
@@ -679,8 +766,8 @@ class Player {
             let startX = this.x + this.width / 2;
 
             if (useSpread) {
-                let spreadFactor = Math.min(1.2, 0.3 + (this.soldiers / 10000));
-                if (feverActive) spreadFactor = 1.5;
+                let spreadFactor = Math.min(0.45, 0.12 + (this.soldiers / 30000));
+                if (feverActive) spreadFactor = Math.min(0.6, spreadFactor + 0.1);
 
                 if (count > 1) {
                     angle = -spreadFactor / 2 + (spreadFactor / (count - 1)) * i;
@@ -745,7 +832,7 @@ class Enemy {
         this.x = x ?? Math.random() * (GAME_WIDTH - 40);
         this.y = y ?? -50;
         this.type = type;
-        this.speed = gameSpeed* (0.9+Math.random()* 0.4);
+        this.speed = gameSpeed + 1 + Math.random() * 2;
         this.packSize = packSize;
         this.markedForDeletion = false;
         this.color = '#e74c3c';
@@ -755,22 +842,22 @@ class Enemy {
         if (this.type === 'tank') {
             this.width = 60;
             this.height = 60;
-            this.speed = gameSpeed * 0.75;
+            this.speed = gameSpeed * 0.8 + 0.5;
         } else if (this.type === 'speed') {
-            this.speed = gameSpeed * 1.8;
+            this.speed = gameSpeed * 1.5 + 3;
         } else if (this.type === 'armor') {
             this.width = 65;
             this.height = 65;
             this.speed = gameSpeed * 0.75 + 0.5;
         } else if (this.type === 'splitter') {
-            this.speed = gameSpeed *(1.1 + Math.random() * 0.3);
+            this.speed = gameSpeed + 1.5 + Math.random() * 2;
         } else if (this.type === 'shooter') {
             this.width = 45;
             this.height = 45;
-            this.speed = gameSpeed* (0.95 + Math.random() * 0.3);
+            this.speed = gameSpeed + 0.8 + Math.random() * 1.2;
         }
 
-        const scaledBaseHp = getScaledBaseHp();
+        const scaledBaseHp = Math.max(3, Math.floor(score * 0.01));
 
         if (hp !== null && hp !== undefined) {
             this.hp = hp;
@@ -820,6 +907,11 @@ class Enemy {
 
             if (frameCount - this.lastShotFrame > 120) {
                 this.shootAtPlayer();
+                this.lastShotFrame = frameCount;
+            }
+        } else if (this.type === 'normal' && score >= 10000) {
+            if (frameCount - this.lastShotFrame > 90 && Math.random() < 0.2) {
+                this.shootAtPlayer(4.5, 'normal');
                 this.lastShotFrame = frameCount;
             }
         }
@@ -1210,12 +1302,15 @@ class Boss {
         this.level = Math.floor(score / 2000) + 1;
 
         const bossBaseHp = Math.max(120, Math.floor(score * 0.12));
-        this.hp = bossBaseHp + (this.level * 40);
+        this.hp = (bossBaseHp + (this.level * 40)) * 10;
         this.maxHp = this.hp;
 
         this.markedForDeletion = false;
         this.attackTimer = 0;
         this.isDashing = false;
+
+        this.dashCount = 0;
+        this.maxDashCount = Math.max(3, 2 + this.level);
 
         const rand = Math.floor(Math.random() * 5);
         this.imageIndex = rand < 4 ? rand : -1;
@@ -1224,7 +1319,7 @@ class Boss {
 
     update() {
         if (this.isDashing) {
-            this.y += 15;
+            this.y += 13;
 
             if (this.y > GAME_HEIGHT) {
                 this.y = -200;
@@ -1243,7 +1338,7 @@ class Boss {
         }
 
         this.attackTimer++;
-        const attackInterval = Math.max(24, 70 - (this.level * 5));
+        const attackInterval = Math.max(30, 80 - (this.level * 5));
 
         if (this.attackTimer > attackInterval) {
             this.attackTimer = 0;
@@ -1254,36 +1349,33 @@ class Boss {
     attack() {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height;
-
         const dx = (player.x + player.width / 2) - centerX;
         const dy = (player.y + player.height / 2) - centerY;
         const targetAngle = Math.atan2(dy, dx);
 
         enemies.push(new EnemyBullet(centerX, centerY, targetAngle, 5));
-        enemies.push(new EnemyBullet(centerX, centerY, targetAngle - 0.15, 5));
-        enemies.push(new EnemyBullet(centerX, centerY, targetAngle + 0.15, 5));
 
         if (this.level >= 2) {
-            enemies.push(new EnemyBullet(centerX, centerY, targetAngle - 0.35, 5));
-            enemies.push(new EnemyBullet(centerX, centerY, targetAngle + 0.35, 5));
+            enemies.push(new EnemyBullet(centerX, centerY, targetAngle - 0.3, 5));
+            enemies.push(new EnemyBullet(centerX, centerY, targetAngle + 0.3, 5));
         }
 
-        if (this.level >= 3 && Math.random() < 0.45) {
-            for (let i = 0; i < 12; i++) {
-                const angle = (Math.PI * 2 / 12) * i;
+        if (this.level >= 3 && Math.random() < 0.3) {
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 / 8) * i;
                 enemies.push(new EnemyBullet(centerX, centerY, angle, 4));
             }
         }
 
-        if (this.level >= 2 && Math.random() < 0.35) {
+        if (this.level >= 4 && this.dashCount < this.maxDashCount && Math.random() < 0.65) {
             this.isDashing = true;
+            this.dashCount++;
             createFloatingText("DASH!", this.x + this.width / 2, this.y, "red");
             playSound('boss-dash');
         }
 
-        if (this.level >= 5 && Math.random() < 0.5) {
-            enemies.push(new EnemyBullet(centerX, centerY, targetAngle - 0.08, 12, 'laser'));
-            enemies.push(new EnemyBullet(centerX, centerY, targetAngle + 0.08, 12, 'laser'));
+        if (this.level >= 5 && Math.random() < 0.4) {
+            enemies.push(new EnemyBullet(centerX, centerY, targetAngle, 12, 'laser'));
         }
     }
 
@@ -1313,6 +1405,7 @@ class Boss {
         ctx.textAlign = 'center';
         ctx.fillText(`Lv.${this.level}`, this.x + this.width / 2, this.y - 25);
 
+        ctx.fillStyle = 'white';
         ctx.font = 'bold 14px Arial';
         ctx.fillText(`${Math.ceil(this.hp)} / ${Math.ceil(this.maxHp)}`, this.x + this.width / 2, this.y - 35);
 
@@ -1414,18 +1507,28 @@ function spawnEnemy() {
 
     if (Math.random() < spawnChance) {
         let packSize = 1;
+        let hpMultiplier = 1;
         let type = 'normal';
 
         if (score >= 15000) {
             const rand = Math.random();
 
-            if (rand < 0.20) type = 'armor';
-            else if (rand < 0.35) type = 'splitter';
-            else if (rand < 0.50) type = 'shooter';
-            else if (rand < 0.62) type = 'tank';
-            else if (rand < 0.74) type = 'speed';
-            else if (rand < 0.86) type = 'zigzag';
-            else {
+            if (rand < 0.20) {
+                type = 'armor';
+            } else if (rand < 0.35) {
+                type = 'splitter';
+            } else if (rand < 0.50) {
+                type = 'shooter';
+            } else if (rand < 0.62) {
+                type = 'tank';
+                hpMultiplier = 1;
+            } else if (rand < 0.74) {
+                type = 'speed';
+                hpMultiplier = 1;
+            } else if (rand < 0.86) {
+                type = 'zigzag';
+                hpMultiplier = 1;
+            } else {
                 packSize = Math.floor(Math.random() * 3) + 2;
                 type = 'pack';
             }
@@ -1433,10 +1536,13 @@ function spawnEnemy() {
         } else if (frameCount > 1000) {
             const rand = Math.random();
 
-            if (rand < 0.2) type = 'tank';
-            else if (rand < 0.4) type = 'speed';
-            else if (rand < 0.6) type = 'zigzag';
-            else if (rand < 0.7) {
+            if (rand < 0.2) {
+                type = 'tank';
+            } else if (rand < 0.4) {
+                type = 'speed';
+            } else if (rand < 0.6) {
+                type = 'zigzag';
+            } else if (rand < 0.7) {
                 packSize = Math.floor(Math.random() * 3) + 2;
                 type = 'pack';
             }
@@ -1444,12 +1550,16 @@ function spawnEnemy() {
         } else if (frameCount > 500) {
             const rand = Math.random();
 
-            if (rand < 0.2) type = 'tank';
-            else if (rand < 0.4) type = 'speed';
-            else if (rand < 0.6) type = 'zigzag';
+            if (rand < 0.2) {
+                type = 'tank';
+            } else if (rand < 0.4) {
+                type = 'speed';
+            } else if (rand < 0.6) {
+                type = 'zigzag';
+            }
         }
 
-        enemies.push(new Enemy(null, null, null, packSize, type, 1));
+        enemies.push(new Enemy(null, null, null, packSize, type, hpMultiplier));
 
         if (score >= 15000 && Math.random() < 0.18) {
             const extraTypeRand = Math.random();
@@ -1506,17 +1616,16 @@ function checkCollisions() {
                     }
 
                     if (enemy.type === 'splitter') {
-                        const splitHp = Math.max(3, Math.floor(getScaledBaseHp() * 0.6));
-                        const child1 = new Enemy(enemy.x - 10, enemy.y, splitHp, 1, 'speed', 1);
-                        const child2 = new Enemy(enemy.x + 10, enemy.y, splitHp, 1, 'speed', 1);
+                        const child1 = new Enemy(enemy.x - 10, enemy.y, Math.max(3, Math.floor(score * 0.006)), 1, 'speed', 1);
+                        const child2 = new Enemy(enemy.x + 10, enemy.y, Math.max(3, Math.floor(score * 0.006)), 1, 'speed', 1);
 
                         child1.width = 28;
                         child1.height = 28;
                         child2.width = 28;
                         child2.height = 28;
 
-                        child1.speed = gameSpeed * 1.6;
-                        child2.speed = gameSpeed * 1.6;
+                        child1.speed = gameSpeed * 1.8 + 3;
+                        child2.speed = gameSpeed * 1.8 + 3;
 
                         enemies.push(child1, child2);
                         createFloatingText("SPLIT!", enemy.x + enemy.width / 2, enemy.y, "#9b59b6");
@@ -1559,29 +1668,29 @@ function checkCollisions() {
                     const currentLevel = Math.floor(score / 2000) + 1;
 
                     if (isBullet) {
-                        const baseDamage = enemy.type === 'laser' ? 100 : 30;
+                        const baseDamage = enemy.type === 'laser' ? 150 : 45;
                         if (currentLevel > 5) {
-                            const ratio = enemy.type === 'laser' ? 0.3 : 0.1;
+                            const ratio = enemy.type === 'laser' ? 0.35 : 0.15;
                             damage = Math.max(baseDamage, Math.floor(player.soldiers * ratio));
                         } else {
                             damage = baseDamage;
                         }
                     } else {
-                        let baseDamage = 10;
+                        let baseDamage = 18;
 
-                        if (enemy.type === 'pack') baseDamage = 10 * Math.max(1, enemy.packSize);
-                        else if (enemy.type === 'tank') baseDamage = 45;
-                        else if (enemy.type === 'speed') baseDamage = 10;
-                        else if (enemy.type === 'zigzag') baseDamage = 20;
-                        else if (enemy.type === 'armor') baseDamage = 60;
-                        else if (enemy.type === 'splitter') baseDamage = 25;
-                        else if (enemy.type === 'shooter') baseDamage = 35;
+                        if (enemy.type === 'pack') baseDamage = 18 * Math.max(1, enemy.packSize);
+                        else if (enemy.type === 'tank') baseDamage = 70;
+                        else if (enemy.type === 'speed') baseDamage = 18;
+                        else if (enemy.type === 'zigzag') baseDamage = 32;
+                        else if (enemy.type === 'armor') baseDamage = 90;
+                        else if (enemy.type === 'splitter') baseDamage = 40;
+                        else if (enemy.type === 'shooter') baseDamage = 50;
 
                         if (currentLevel > 5) {
-                            let ratio = 0.2;
-                            if (enemy.type === 'tank') ratio = 0.35;
-                            else if (enemy.type === 'armor') ratio = 0.4;
-                            else if (enemy.type === 'shooter') ratio = 0.25;
+                            let ratio = 0.24;
+                            if (enemy.type === 'tank') ratio = 0.38;
+                            else if (enemy.type === 'armor') ratio = 0.45;
+                            else if (enemy.type === 'shooter') ratio = 0.3;
                             damage = Math.max(baseDamage, Math.floor(player.soldiers * ratio));
                         } else {
                             damage = baseDamage;
@@ -1879,11 +1988,15 @@ function animate() {
             player.y + player.height > boss.y
         ) {
             if (!shieldActive && bossCollisionCooldown <= 0) {
+                let damage = 0;
+                const currentLevel = Math.floor(score / 2000) + 1;
+
                 if (boss.isDashing) {
-                    const currentLevel = Math.floor(score / 2000) + 1;
-                    const damage = currentLevel > 5
-                        ? Math.max(300, Math.floor(player.soldiers * 0.5))
-                        : 300;
+                    if (currentLevel > 5) {
+                        damage = Math.max(350, Math.floor(player.soldiers * 0.55));
+                    } else {
+                        damage = 350;
+                    }
 
                     bossCollisionCooldown = 30;
                     createFloatingText("CRITICAL!", player.x, player.y, "red");
@@ -2024,6 +2137,8 @@ function loadGameAndStart() {
         boss.isDashing = data.boss.isDashing;
         boss.imageIndex = data.boss.imageIndex;
         boss.image = boss.imageIndex >= 0 ? bossImgs[boss.imageIndex] : enemyImg;
+        boss.dashCount = data.boss.dashCount ?? 0;
+        boss.maxDashCount = data.boss.maxDashCount ?? Math.max(3, 2 + boss.level);
     } else {
         boss = null;
     }
@@ -2034,6 +2149,7 @@ function loadGameAndStart() {
 
 function startGameCommon() {
     document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('records-screen').classList.add('hidden');
     document.getElementById('game-over-screen').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
     gameState = 'PLAYING';
@@ -2072,6 +2188,7 @@ function resetGameData() {
     storedFever = 0;
 
     bossCollisionCooldown = 0;
+    scrollOffset = 0;
     gameSpeed = 1.2;
     updateHUD();
 }
@@ -2109,6 +2226,7 @@ function endGame() {
 }
 
 function returnToMain() {
+    document.getElementById('records-screen').classList.add('hidden');
     document.getElementById('game-over-screen').classList.add('hidden');
     document.getElementById('start-screen').classList.remove('hidden');
     initStartScreen();
@@ -2242,6 +2360,24 @@ function playSound(type) {
         }
     }
 }
+
+/**
+ * 버튼 이벤트 연결
+ */
+document.getElementById('bgm-btn').addEventListener('click', toggleSound);
+document.getElementById('start-game-btn').addEventListener('click', startNewGame);
+document.getElementById('show-records-btn').addEventListener('click', showRecords);
+document.getElementById('resume-btn').addEventListener('click', loadGameAndStart);
+document.getElementById('close-records-btn').addEventListener('click', hideRecords);
+document.getElementById('return-main-btn').addEventListener('click', returnToMain);
+
+// 전역 노출(혹시 외부에서 필요할 경우)
+window.startNewGame = startNewGame;
+window.showRecords = showRecords;
+window.loadGameAndStart = loadGameAndStart;
+window.hideRecords = hideRecords;
+window.returnToMain = returnToMain;
+window.toggleSound = toggleSound;
 </script>
 </body>
 </html>
