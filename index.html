@@ -837,13 +837,14 @@ class Player {
         let startX = this.x + this.width / 2;
 
         if (useSpread) {
-            let spreadFactor = Math.min(1.2, 0.3 + (this.soldiers / 10000));
-            if (feverActive) spreadFactor = 1.5;
+    // 기존보다 퍼짐 각도 축소
+    let spreadFactor = Math.min(0.6, 0.12 + (this.soldiers / 30000));
+    if (feverActive) spreadFactor = 0.8;
 
-            if (count > 1) {
-                angle = -spreadFactor / 2 + (spreadFactor / (count - 1)) * i;
-            }
-        } else {
+    if (count > 1) {
+        angle = -spreadFactor / 2 + (spreadFactor / (count - 1)) * i;
+    }
+}else {
             const spreadX = 10;
             const offset = (i - (count - 1) / 2) * spreadX;
             startX += offset;
@@ -1233,7 +1234,7 @@ class Boss {
         // 보스 레벨 표시는 그대로 두되, 체력은 점수 기준으로 설정
 this.level = Math.floor(score / 2000) + 1;
 
-this.hp = Math.max(100, Math.floor(score * 0.5));
+this.hp = Math.max(100, Math.floor(score * 0.1));
 this.maxHp = this.hp;
         this.markedForDeletion = false;
         this.angle = 0;
@@ -1312,7 +1313,7 @@ this.maxHp = this.hp;
         }
         
         // 레벨 4 이상: 몸통 박치기 (돌진)
-        if (this.level >= 4 && Math.random() < 0.2) {
+        if (this.level >= 2 && Math.random() < 0.3) {
              this.isDashing = true;
              createFloatingText("DASH!", this.x + this.width/2, this.y, "red");
              playSound('boss-dash'); // 돌진 효과음
@@ -1361,7 +1362,7 @@ this.maxHp = this.hp;
 function spawnBoss() {
     boss = new Boss();
     // 레벨 3 이상부터는 보스전 집중 모드 (스크롤 정지, 잡몹 제거)
-    if (boss.level >= 3) {
+    if (boss.level >= 2) {
         isBossBattleMode = true;
         gates = []; // 게이트 제거
         enemies = []; // 잡몹 제거
@@ -1542,20 +1543,10 @@ bullets.forEach(bullet => {
                     let damage = 0;
                     const currentLevel = Math.floor(score / 2000) + 1; // 난이도 레벨
 
-                    if (isBullet) {
-                        // 총알 데미지 (기본 데미지 대폭 상향)
-                        // 일반탄: 30, 레이저: 100
-                        let baseDamage = enemy.type === 'laser' ? 100 : 30; 
-                        
-                        // Lv 6 이상(점수 10000점 이상)부터는 비율 데미지 적용
-                        if (currentLevel > 5) {
-                            // 일반탄 10%, 레이저 30% (매우 아픔)
-                            const ratio = enemy.type === 'laser' ? 0.3 : 0.1;
-                            damage = Math.max(baseDamage, Math.floor(player.soldiers * ratio));
-                        } else {
-                            damage = baseDamage;
-                        }
-                    } else {
+                   if (isBullet) {
+    // 몬스터 총알은 병사 수의 5% 감소
+    damage = Math.max(1, Math.floor(player.soldiers * 0.05));
+} else {
                         // 몸통 박치기 데미지
                         const currentPackCount = Math.ceil(enemy.hp / 3) || 1;
                         // 기본 데미지 상향: 마리당 5 -> 10
@@ -1842,10 +1833,10 @@ function animate() {
                     // 돌진 중일 때는 큰 피해 (한 번에 쾅!)
                     if (currentLevel > 5) {
                         // 고레벨: 병사의 50% 즉시 삭제 (절반이 날아감)
-                        damage = Math.max(300, Math.floor(player.soldiers * 0.5));
+                        damage = Math.max(300, Math.floor(player.soldiers * 0.05));
                     } else {
-                        // 저레벨: 300명 감소
-                        damage = 300;
+                        // 저레벨: 10%
+                        damage =  Math.max(300, Math.floor(player.soldiers * 0.01));
                     }
                     
                     // 플레이어 넉백
