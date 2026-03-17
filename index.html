@@ -533,9 +533,10 @@ const QUESTIONS = [
 let gameState = 'START'; // START, PLAYING, PAUSED, GAMEOVER
 let frameCount = 0;
 let score = 0;
-let gameSpeed = 1.0;
+let gameSpeed = 1.0; // 게임 스피드 약간 감소
 let isBossBattleMode = false; // 보스전 모드 (정지)
 let scrollOffset = 0; // 배경 스크롤용
+let questionPauseTimer = 0; // 문제 등장 시 3초 정지
 
 // 통계 변수
 let nickname = "학생";
