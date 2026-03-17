@@ -533,7 +533,7 @@ const QUESTIONS = [
 let gameState = 'START'; // START, PLAYING, PAUSED, GAMEOVER
 let frameCount = 0;
 let score = 0;
-let gameSpeed = 1.2;
+let gameSpeed = 1.0;
 let isBossBattleMode = false; // 보스전 모드 (정지)
 let scrollOffset = 0; // 배경 스크롤용
 
@@ -926,9 +926,9 @@ class Enemy {
         this.packSize = packSize;
         
         // 체력 설정
-        const baseHp = 3;
-        this.hp = hp ?? (baseHp * this.packSize * hpMultiplier);
-        this.maxHp = this.hp; // 최대 체력 (보스 등 표시용)
+const baseHp = Math.max(1, Math.floor(score * 0.01)); // 기본 몬스터 체력 = 점수의 0.01
+this.hp = hp ?? Math.max(1, Math.floor(baseHp * this.packSize * hpMultiplier));
+this.maxHp = this.hp; // 최대 체력 (보스 등 표시용)
         
         this.markedForDeletion = false;
         this.color = '#e74c3c';
@@ -1446,6 +1446,8 @@ function spawnGateRow() {
     for(let i=0; i<3; i++) {
         gates.push(new Gate(i * gateWidth, gateWidth, options[i].text, options[i].isCorrect));
     }
+
+    questionPauseTimer = 180; // 3초 정지 (60fps 기준)
 }
 
 function spawnEnemy() {
@@ -1716,6 +1718,18 @@ function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawRoad();
 
+    // 문제 등장 시 3초 정지
+    if (questionPauseTimer > 0) {
+        questionPauseTimer--;
+
+        gates.forEach(g => g.draw());
+        player.draw();
+        drawUI();
+
+        requestAnimationFrame(animate);
+        return;
+    }
+
     player.x += (targetX - player.x) * 0.1;
     if (player.x < 0) player.x = 0;
     if (player.x > GAME_WIDTH - player.width) player.x = GAME_WIDTH - player.width;
@@ -1854,8 +1868,8 @@ function animate() {
     if(frameCount % 10 === 0) updateHUD(); // HUD 업데이트
 
     // [추가] 속도 점진적 증가 (최대 1.8까지)
-    if (!isBossBattleMode && gameSpeed < 1.8) {
-        gameSpeed += 0.0002; 
+    if (!isBossBattleMode && gameSpeed < 1.5) {
+        gameSpeed += 0.00012; 
     }
 
     frameCount++;
