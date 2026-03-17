@@ -2171,7 +2171,7 @@ function playSound(type) {
  * 7. 글로벌 랭킹 시스템 (Google Sheets & Apps Script)
  */
 function sendToGlobalRanking() {
-    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) return;
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbysrTxS1IPXmbGYInVf0spvAqZvRQk4-hnhWF1Fo2u9PaR1nrRhLZuENW67DpHdxEuqcQ/exec")) return;
 
     const payload = {
         action: "update",
@@ -2224,7 +2224,7 @@ function loadRankings(sortBy) {
     listDiv.innerHTML = '<p class="loading-text">데이터를 불러오는 중...</p>';
     myRankSection.style.display = 'none';
 
-    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에")) {
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbysrTxS1IPXmbGYInVf0spvAqZvRQk4-hnhWF1Fo2u9PaR1nrRhLZuENW67DpHdxEuqcQ/exec")) {
         listDiv.innerHTML = '<p class="loading-text">랭킹 서버 URL이 설정되지 않았습니다.</p>';
         return;
     }
